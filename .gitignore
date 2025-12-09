@@ -1,0 +1,28 @@
+# dependencies
+node_modules
+.pnpm-store
+
+# build outputs
+.next
+out
+build
+dist
+
+# turbo
+.turbo
+
+# env files
+.env
+.env.local
+.env.*.local
+
+# misc
+.DS_Store
+*.pem
+*.log
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
