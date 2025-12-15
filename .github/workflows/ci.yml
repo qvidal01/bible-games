@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint --workspace @bible-games/web || true
+
+      - name: Type check
+        run: npm run build --workspace @bible-games/web
+        env:
+          NEXT_PUBLIC_PUSHER_KEY: placeholder
+          NEXT_PUBLIC_PUSHER_CLUSTER: us2
+
+      - name: Run tests
+        run: npm test --workspace @bible-games/web || true

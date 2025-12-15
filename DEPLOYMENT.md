@@ -187,35 +187,60 @@ htop
 ./deploy/rollback.sh 1
 ```
 
-## CI/CD Integration (Future)
+## CI/CD Integration
 
-For automated deployments, add GitHub Actions workflow:
+GitHub Actions automatically deploys on push to `main`. Workflows are in `.github/workflows/`.
 
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy to Production
+### Workflows
 
-on:
-  push:
-    branches: [main]
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `deploy.yml` | Push to main, manual | Build, test, deploy to production |
+| `ci.yml` | Pull requests | Build and test only |
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.PROXMOX_HOST }}
-          username: dunkin
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            sudo pct exec 350 -- su - appuser -c '/home/appuser/projects/bible-games/deploy/update.sh'
+### Required GitHub Secrets
+
+Set these in **Settings → Secrets and variables → Actions**:
+
+| Secret | Description |
+|--------|-------------|
+| `PROXMOX_HOST` | `192.168.0.165` |
+| `SSH_USERNAME` | `dunkin` |
+| `SSH_PRIVATE_KEY` | SSH private key for dunkin@proxmain |
+| `NEXT_PUBLIC_PUSHER_KEY` | Pusher public key |
+
+### Manual Deployment
+
+Trigger manual deployment from **Actions → Deploy to Production → Run workflow**:
+- **update**: Quick deploy (git pull + build + reload)
+- **full**: Full deploy (with backup and npm install)
+
+### SSH Key Setup
+
+Generate a deploy key and add it to the Proxmox host:
+
+```bash
+# On your machine
+ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/github-deploy
+
+# Copy public key to Proxmox host
+ssh-copy-id -i ~/.ssh/github-deploy.pub dunkin@192.168.0.165
+
+# Add private key content to GitHub secret SSH_PRIVATE_KEY
+cat ~/.ssh/github-deploy
 ```
 
 ## Cloudflare Tunnel
 
-The app is exposed via Cloudflare Tunnel. Configuration is managed through:
+The app is exposed via Cloudflare Tunnel at **https://games.aiqso.io**.
+
+| Domain | Service |
+|--------|---------|
+| `games.aiqso.io` | http://192.168.0.52:3000 |
+| `jeopardy.aiqso.io` | http://192.168.0.52:3000 |
+
+Configuration managed on proxmicro (192.168.0.166):
+- Config: `/etc/cloudflared/config.yml`
 - Tunnel: `915fd3b4-98e8-42fd-bc1d-c5f72482dafc`
 - Domain: `biblegames.aiqso.io` (or similar)
 
