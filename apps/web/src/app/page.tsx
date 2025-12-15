@@ -129,7 +129,10 @@ export default function Home() {
                 <li>• Study mode for solo practice</li>
               </ul>
               <div className="flex items-center justify-between">
-                <span className="text-yellow-400 font-semibold">2-15 players</span>
+                <div className="text-yellow-400 font-semibold text-xs leading-tight">
+                  <div>Solo, 2-5 players, or 3 teams</div>
+                  <div className="text-yellow-400/70">+ 10 spectators</div>
+                </div>
                 <span className="bg-yellow-500 text-blue-900 px-4 py-2 rounded-lg font-bold">
                   PLAY
                 </span>
@@ -158,7 +161,10 @@ export default function Home() {
                 <li>• Points based on answer popularity</li>
               </ul>
               <div className="flex items-center justify-between">
-                <span className="text-yellow-400 font-semibold">4-16 players</span>
+                <div className="text-yellow-400 font-semibold text-xs leading-tight">
+                  <div>2-3 teams (up to 5 each)</div>
+                  <div className="text-yellow-400/70">+ 10 spectators</div>
+                </div>
                 <span className="bg-yellow-500 text-red-900 px-4 py-2 rounded-lg font-bold">
                   PLAY
                 </span>
@@ -192,7 +198,10 @@ export default function Home() {
                 <li>• Perfect for family worship</li>
               </ul>
               <div className="flex items-center justify-between">
-                <span className="text-yellow-400/70 font-semibold">All ages</span>
+                <div className="text-yellow-400/70 font-semibold text-xs leading-tight">
+                  <div>2-5 players</div>
+                  <div>+ 10 spectators</div>
+                </div>
                 <span className="bg-green-600/50 text-green-200 px-4 py-2 rounded-lg font-bold border border-green-500/50">
                   SOON
                 </span>
@@ -226,7 +235,10 @@ export default function Home() {
                 <li>• Multiple themed scenarios</li>
               </ul>
               <div className="flex items-center justify-between">
-                <span className="text-yellow-400/70 font-semibold">2-8 players</span>
+                <div className="text-yellow-400/70 font-semibold text-xs leading-tight">
+                  <div>2-6 players</div>
+                  <div>No spectators</div>
+                </div>
                 <span className="bg-purple-600/50 text-purple-200 px-4 py-2 rounded-lg font-bold border border-purple-500/50">
                   SOON
                 </span>

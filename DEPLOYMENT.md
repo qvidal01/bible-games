@@ -237,14 +237,13 @@ The app is exposed via Cloudflare Tunnel at **https://games.aiqso.io**.
 | Domain | Service |
 |--------|---------|
 | `games.aiqso.io` | http://192.168.0.52:3000 |
-| `jeopardy.aiqso.io` | http://192.168.0.52:3000 |
 
-Configuration managed on proxmicro (192.168.0.166):
+Configuration managed on proxmain (192.168.0.165):
 - Config: `/etc/cloudflared/config.yml`
 - Tunnel: `915fd3b4-98e8-42fd-bc1d-c5f72482dafc`
-- Domain: `biblegames.aiqso.io` (or similar)
+- Remote config managed via Cloudflare API
 
-To update tunnel routing, modify the tunnel config on the Cloudflare dashboard or via `cloudflared`.
+To update tunnel routing, use the Cloudflare API or dashboard. Local config is for reference only.
 
 ## Maintenance
 
