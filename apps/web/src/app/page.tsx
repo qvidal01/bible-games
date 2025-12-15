@@ -164,6 +164,74 @@ export default function Home() {
                 </span>
               </div>
             </div>
+
+            {/* Kids Bible Trivia - Coming Soon */}
+            <div className="relative game-card bg-gradient-to-br from-green-700 to-green-900 rounded-2xl p-6 border-2 border-green-500/50 opacity-90">
+              {/* Coming Soon Banner */}
+              <div className="absolute -top-3 -right-3 z-10">
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-lg transform rotate-12 animate-pulse">
+                  COMING SOON
+                </div>
+              </div>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-yellow-500/80 rounded-xl flex items-center justify-center">
+                  <svg className="w-9 h-9 text-green-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Kids Bible Trivia</h3>
+                  <p className="text-green-300">Picture guessing fun!</p>
+                </div>
+              </div>
+              <ul className="text-green-200 text-sm space-y-1 mb-4">
+                <li>• Picture-based character guessing</li>
+                <li>• Age-appropriate questions</li>
+                <li>• Fun animations and sounds</li>
+                <li>• Multiple difficulty levels</li>
+                <li>• Perfect for family worship</li>
+              </ul>
+              <div className="flex items-center justify-between">
+                <span className="text-yellow-400/70 font-semibold">All ages</span>
+                <span className="bg-green-600/50 text-green-200 px-4 py-2 rounded-lg font-bold border border-green-500/50">
+                  SOON
+                </span>
+              </div>
+            </div>
+
+            {/* Bible Escape Room - Coming Soon */}
+            <div className="relative game-card bg-gradient-to-br from-purple-700 to-purple-900 rounded-2xl p-6 border-2 border-purple-500/50 opacity-90">
+              {/* Coming Soon Banner */}
+              <div className="absolute -top-3 -right-3 z-10">
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-lg transform rotate-12 animate-pulse">
+                  COMING SOON
+                </div>
+              </div>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-yellow-500/80 rounded-xl flex items-center justify-center">
+                  <svg className="w-9 h-9 text-purple-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Bible Escape Room</h3>
+                  <p className="text-purple-300">Solve clues to escape!</p>
+                </div>
+              </div>
+              <ul className="text-purple-200 text-sm space-y-1 mb-4">
+                <li>• Interactive puzzle rooms</li>
+                <li>• Bible-based clues and riddles</li>
+                <li>• Scenic locations and animations</li>
+                <li>• Team collaboration challenges</li>
+                <li>• Multiple themed scenarios</li>
+              </ul>
+              <div className="flex items-center justify-between">
+                <span className="text-yellow-400/70 font-semibold">2-8 players</span>
+                <span className="bg-purple-600/50 text-purple-200 px-4 py-2 rounded-lg font-bold border border-purple-500/50">
+                  SOON
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Quick Join */}
