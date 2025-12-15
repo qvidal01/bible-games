@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { FeedbackWidget } from '@shared/components/FeedbackWidget';
 
 export const metadata: Metadata = {
   title: 'Bible Games - JW Edition',
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         {children}
+        <FeedbackWidget />
       </body>
     </html>
   );
