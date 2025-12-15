@@ -248,6 +248,39 @@ export default function JeopardyHome() {
                   >
                     Browse Public Rooms
                   </button>
+
+                  {/* How to Play */}
+                  <div className="mt-6 pt-4 border-t border-blue-700/50">
+                    <h3 className="text-yellow-400 font-bold text-center mb-3">How to Play</h3>
+                    <div className="bg-blue-900/30 rounded-lg p-4 text-sm">
+                      <ul className="text-blue-200 space-y-2">
+                        <li className="flex gap-2">
+                          <span className="text-yellow-400">1.</span>
+                          <span>Host selects a category and point value from the board</span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="text-yellow-400">2.</span>
+                          <span>Players buzz in to answer (answer as a question!)</span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="text-yellow-400">3.</span>
+                          <span>Correct answers earn points; wrong answers lose points</span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="text-yellow-400">4.</span>
+                          <span>Daily Doubles let you wager your points</span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="text-yellow-400">5.</span>
+                          <span>Final Jeopardy: All players wager on the final question</span>
+                        </li>
+                      </ul>
+                      <div className="mt-3 pt-3 border-t border-blue-700/30 text-blue-300 text-xs">
+                        <p><strong>Players:</strong> Solo study, 2-5 individuals, or 3 teams (up to 5 each)</p>
+                        <p><strong>Spectators:</strong> Up to 10 can watch</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 

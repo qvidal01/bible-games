@@ -203,6 +203,39 @@ export default function FamilyFeudHome() {
                   >
                     Browse Public Rooms
                   </button>
+
+                  {/* How to Play */}
+                  <div className="mt-6 pt-4 border-t border-red-700/50">
+                    <h3 className="text-yellow-400 font-bold text-center mb-3">How to Play</h3>
+                    <div className="bg-red-900/30 rounded-lg p-4 text-sm">
+                      <ul className="text-red-200 space-y-2">
+                        <li className="flex gap-2">
+                          <span className="text-yellow-400">1.</span>
+                          <span>Two teams face off to guess the most popular survey answers</span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="text-yellow-400">2.</span>
+                          <span>One player from each team does a face-off to control the board</span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="text-yellow-400">3.</span>
+                          <span>The controlling team guesses answers - 3 strikes and the other team can steal!</span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="text-yellow-400">4.</span>
+                          <span>Points are awarded for each correct answer on the board</span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="text-yellow-400">5.</span>
+                          <span>First team to reach the target score wins!</span>
+                        </li>
+                      </ul>
+                      <div className="mt-3 pt-3 border-t border-red-700/30 text-red-300 text-xs">
+                        <p><strong>Teams:</strong> 2-3 teams with up to 5 players each</p>
+                        <p><strong>Spectators:</strong> Up to 10 can watch</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
