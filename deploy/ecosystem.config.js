@@ -3,8 +3,8 @@ module.exports = {
     {
       name: 'bible-games',
       cwd: '/home/appuser/projects/bible-games/apps/web',
-      script: 'node_modules/.bin/next',
-      args: 'start -p 3000',
+      script: 'npm',
+      args: 'run start -- -p 3000',
       instances: 1,
       exec_mode: 'fork',
       watch: false,
