@@ -339,11 +339,22 @@ export default function JeopardyGamePage({ params }: { params: Promise<{ roomCod
   }, []);
 
   // Handle end game (by host)
-  const handleEndGame = useCallback(() => {
+  const handleEndGame = useCallback(async () => {
     setGameEnded(true);
     setGameEndReason('host-ended');
     broadcastEvent(GAME_EVENTS.GAME_ENDED, { reason: 'host-ended', hostName: playerName });
-  }, [broadcastEvent, playerName]);
+
+    // Update server-side room status so it's removed from public rooms list
+    try {
+      await fetch(`/api/rooms/${roomCode}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update-status', status: 'finished' }),
+      });
+    } catch (error) {
+      console.error('Failed to update room status:', error);
+    }
+  }, [broadcastEvent, playerName, roomCode]);
 
   // Handle host transfer
   const handleTransferHost = useCallback((newHostId: string) => {
@@ -523,11 +534,22 @@ export default function JeopardyGamePage({ params }: { params: Promise<{ roomCod
   }, [playerId, roomCode, soundEnabled, addPlayer, removePlayer, initializeBoard, selectQuestion, playerBuzz, updatePlayerScore, markQuestionAnswered, resetBuzz, updateGameState, updateActivity, hostDisconnected, handleHostReconnected, setHostId, players, isHost, status, board, round, isTeamMode, teams, setStatus, setBoard, setRound, enableTeamMode, addWrongAnswerer]);
 
   // Handle category selection and game start
-  const handleStartGame = (categoryIds: string[]) => {
+  const handleStartGame = async (categoryIds: string[]) => {
     initializeBoard(categoryIds);
     broadcastEvent(GAME_EVENTS.GAME_STARTED, { categoryIds });
     if (soundEnabled) playSound('select');
     updateActivity();
+
+    // Update server-side room status to prevent new joins
+    try {
+      await fetch(`/api/rooms/${roomCode}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update-status', status: 'playing' }),
+      });
+    } catch (error) {
+      console.error('Failed to update room status:', error);
+    }
   };
 
   // Handle question selection

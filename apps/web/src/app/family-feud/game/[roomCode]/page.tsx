@@ -369,10 +369,21 @@ export default function FamilyFeudGamePage({ params }: { params: Promise<{ roomC
   };
 
   // Handle starting the game
-  const handleStartGame = () => {
+  const handleStartGame = async () => {
     playSound('select');
     startGame(5); // 5 rounds
     broadcast(FAMILY_FEUD_EVENTS.GAME_STARTED, { maxRounds: 5 });
+
+    // Update server-side room status to prevent new joins
+    try {
+      await fetch(`/api/rooms/${roomCode}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update-status', status: 'playing' }),
+      });
+    } catch (error) {
+      console.error('Failed to update room status:', error);
+    }
   };
 
   // Handle face-off buzz
@@ -439,11 +450,22 @@ export default function FamilyFeudGamePage({ params }: { params: Promise<{ roomC
   };
 
   // Handle end game early
-  const handleEndGame = () => {
+  const handleEndGame = async () => {
     setGameEnded(true);
     setGameEndReason('host-ended');
     setHostName(playerName);
     broadcast(FAMILY_FEUD_EVENTS.GAME_ENDED, { reason: 'host-ended', hostName: playerName });
+
+    // Update server-side room status so it's removed from public rooms list
+    try {
+      await fetch(`/api/rooms/${roomCode}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update-status', status: 'finished' }),
+      });
+    } catch (error) {
+      console.error('Failed to update room status:', error);
+    }
   };
 
   // Loading state
