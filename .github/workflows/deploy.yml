@@ -15,7 +15,6 @@ on:
           - full
 
 env:
-  PROXMOX_HOST: 192.168.0.165
   CONTAINER_ID: 350
   APP_USER: appuser
   APP_DIR: /home/appuser/projects/bible-games
@@ -68,9 +67,9 @@ jobs:
 
             # Execute deployment in container
             if [ "$DEPLOY_TYPE" = "full" ]; then
-              sudo pct exec ${{ env.CONTAINER_ID }} -- su - ${{ env.APP_USER }} -c '${{ env.APP_DIR }}/deploy/deploy.sh'
+              sudo pct exec 350 -- su - appuser -c '/home/appuser/projects/bible-games/deploy/deploy.sh'
             else
-              sudo pct exec ${{ env.CONTAINER_ID }} -- su - ${{ env.APP_USER }} -c '${{ env.APP_DIR }}/deploy/update.sh'
+              sudo pct exec 350 -- su - appuser -c '/home/appuser/projects/bible-games/deploy/update.sh'
             fi
 
       - name: Verify deployment
@@ -81,7 +80,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # Check PM2 status
-            sudo pct exec ${{ env.CONTAINER_ID }} -- su - ${{ env.APP_USER }} -c 'pm2 show bible-games | grep status'
+            sudo pct exec 350 -- su - appuser -c 'pm2 show bible-games | grep status'
 
             # Health check
             sleep 3
