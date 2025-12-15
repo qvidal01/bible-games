@@ -189,46 +189,46 @@ htop
 
 ## CI/CD Integration
 
-GitHub Actions automatically deploys on push to `main`. Workflows are in `.github/workflows/`.
+GitHub Actions workflows are in `.github/workflows/`.
 
 ### Workflows
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| `deploy.yml` | Push to main, manual | Build, test, deploy to production |
+| `deploy.yml` | Manual only | Build, test, deploy (requires network access) |
 | `ci.yml` | Pull requests | Build and test only |
 
-### Required GitHub Secrets
+### Current Limitation
 
-Set these in **Settings → Secrets and variables → Actions**:
+**Auto-deployment is disabled** because the Proxmox server is on a private network (192.168.0.165) that GitHub-hosted runners cannot reach.
+
+To enable automated deployments, you'd need:
+1. **Self-hosted runner** inside your network, OR
+2. **Cloudflare Tunnel** for SSH (expose SSH via tunnel), OR
+3. **Tailscale** VPN on both GitHub runner and Proxmox
+
+### Manual Deployment (Recommended)
+
+From your local machine (inside the network):
+
+```bash
+# Quick update
+ssh dunkin@192.168.0.165 "sudo pct exec 350 -- su - appuser -c 'cd /home/appuser/projects/bible-games && ./deploy/update.sh'"
+
+# Full deployment
+ssh dunkin@192.168.0.165 "sudo pct exec 350 -- su - appuser -c '/home/appuser/projects/bible-games/deploy/deploy.sh'"
+```
+
+### GitHub Secrets (for future use)
+
+If you set up a self-hosted runner or SSH tunnel:
 
 | Secret | Description |
 |--------|-------------|
-| `PROXMOX_HOST` | `192.168.0.165` |
+| `PROXMOX_HOST` | `192.168.0.165` (or tunnel hostname) |
 | `SSH_USERNAME` | `dunkin` |
-| `SSH_PRIVATE_KEY` | SSH private key for dunkin@proxmain |
+| `SSH_PRIVATE_KEY` | SSH private key |
 | `NEXT_PUBLIC_PUSHER_KEY` | Pusher public key |
-
-### Manual Deployment
-
-Trigger manual deployment from **Actions → Deploy to Production → Run workflow**:
-- **update**: Quick deploy (git pull + build + reload)
-- **full**: Full deploy (with backup and npm install)
-
-### SSH Key Setup
-
-Generate a deploy key and add it to the Proxmox host:
-
-```bash
-# On your machine
-ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/github-deploy
-
-# Copy public key to Proxmox host
-ssh-copy-id -i ~/.ssh/github-deploy.pub dunkin@192.168.0.165
-
-# Add private key content to GitHub secret SSH_PRIVATE_KEY
-cat ~/.ssh/github-deploy
-```
 
 ## Cloudflare Tunnel
 

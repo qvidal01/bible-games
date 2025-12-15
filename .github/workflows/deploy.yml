@@ -1,8 +1,12 @@
 name: Deploy to Production
 
+# NOTE: Deployment to private network requires self-hosted runner or SSH tunnel
+# Currently only builds and tests. Manual deployment via SSH from local machine.
+
 on:
-  push:
-    branches: [main]
+  # Disabled: push triggers - uncomment when self-hosted runner is set up
+  # push:
+  #   branches: [main]
   workflow_dispatch:
     inputs:
       deploy_type:
