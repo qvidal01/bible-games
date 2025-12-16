@@ -18,6 +18,7 @@ import FaceOffBuzzNotification from '../../components/FaceOffBuzzNotification';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { getPusherClient, getGameChannel, FAMILY_FEUD_EVENTS } from '@shared/lib/pusher';
 import { initSounds, playSound } from '@shared/lib/sounds';
+import * as analytics from '@shared/lib/analytics';
 
 export default function FamilyFeudGamePage({ params }: { params: Promise<{ roomCode: string }> }) {
   const { roomCode } = use(params);
@@ -374,6 +375,16 @@ export default function FamilyFeudGamePage({ params }: { params: Promise<{ roomC
     startGame(5); // 5 rounds
     broadcast(FAMILY_FEUD_EVENTS.GAME_STARTED, { maxRounds: 5 });
 
+    // Track analytics
+    analytics.trackFamilyFeudGameStarted({
+      roomCode,
+      redTeamName: teams.red.name,
+      blueTeamName: teams.blue.name,
+      redTeamPlayers: teams.red.players.length,
+      blueTeamPlayers: teams.blue.players.length,
+      questionCount: 5,
+    });
+
     // Update server-side room status to prevent new joins
     try {
       await fetch(`/api/rooms/${roomCode}`, {
@@ -392,6 +403,13 @@ export default function FamilyFeudGamePage({ params }: { params: Promise<{ roomC
       playSound('buzz');
       faceOffBuzz(playerTeam);
       broadcast(FAMILY_FEUD_EVENTS.FACE_OFF_BUZZ, { teamId: playerTeam });
+
+      // Track analytics
+      analytics.trackFamilyFeudFaceOff({
+        roomCode,
+        winningTeam: playerTeam,
+        round,
+      });
     }
   };
 
@@ -405,41 +423,122 @@ export default function FamilyFeudGamePage({ params }: { params: Promise<{ roomC
   const handlePlayOrPass = (decision: 'play' | 'pass') => {
     playOrPass(decision);
     broadcast(FAMILY_FEUD_EVENTS.PLAY_OR_PASS, { decision });
+
+    // Track analytics
+    if (faceOffWinner) {
+      analytics.trackFamilyFeudPlayOrPass({
+        roomCode,
+        team: faceOffWinner,
+        decision,
+        round,
+      });
+    }
   };
 
   // Handle revealing an answer (host only)
   const handleRevealAnswer = (answerId: string) => {
+    const answer = currentQuestion?.answers.find(a => a.id === answerId);
+    const answerRank = currentQuestion?.answers.findIndex(a => a.id === answerId) ?? 0;
+
     revealAnswer(answerId);
     broadcast(FAMILY_FEUD_EVENTS.ANSWER_REVEALED, { answerId });
+
+    // Track analytics
+    if (answer) {
+      analytics.trackFamilyFeudAnswerRevealed({
+        roomCode,
+        points: answer.points,
+        answerRank: answerRank + 1,
+        round,
+      });
+    }
   };
 
   // Handle adding a strike
   const handleAddStrike = () => {
+    const currentStrikes = controllingTeam ? teams[controllingTeam].strikes : 0;
     addStrike();
     broadcast(FAMILY_FEUD_EVENTS.STRIKE, {});
+
+    // Track analytics
+    if (controllingTeam) {
+      analytics.trackFamilyFeudStrike({
+        roomCode,
+        team: controllingTeam,
+        strikeCount: currentStrikes + 1,
+        round,
+      });
+    }
   };
 
   // Handle steal attempt
   const handleStealSuccess = () => {
+    const stealingTeam = controllingTeam === 'red' ? 'blue' : 'red';
     attemptSteal(true);
     broadcast(FAMILY_FEUD_EVENTS.STEAL_RESULT, { success: true });
+
+    // Track analytics
+    analytics.trackFamilyFeudSteal({
+      roomCode,
+      stealingTeam,
+      success: true,
+      pointsAtStake: roundPoints,
+      round,
+    });
   };
 
   const handleStealFail = () => {
+    const stealingTeam = controllingTeam === 'red' ? 'blue' : 'red';
     attemptSteal(false);
     broadcast(FAMILY_FEUD_EVENTS.STEAL_RESULT, { success: false });
+
+    // Track analytics
+    analytics.trackFamilyFeudSteal({
+      roomCode,
+      stealingTeam,
+      success: false,
+      pointsAtStake: roundPoints,
+      round,
+    });
   };
 
   // Handle awarding points
   const handleAwardPoints = (teamId: 'red' | 'blue') => {
     awardRoundPoints(teamId);
     broadcast(FAMILY_FEUD_EVENTS.ROUND_POINTS_AWARDED, { teamId });
+
+    // Track analytics
+    analytics.trackFamilyFeudRoundComplete({
+      roomCode,
+      round,
+      winningTeam: teamId,
+      pointsAwarded: roundPoints,
+      redTeamScore: teams.red.score + (teamId === 'red' ? roundPoints : 0),
+      blueTeamScore: teams.blue.score + (teamId === 'blue' ? roundPoints : 0),
+    });
   };
 
   // Handle next question
   const handleNextQuestion = () => {
+    // Check if this is the last question before advancing
+    const isLastQuestion = round >= maxRounds;
+
     nextQuestion();
     broadcast(FAMILY_FEUD_EVENTS.NEXT_QUESTION, {});
+
+    // Track game finished if this was the last round
+    if (isLastQuestion) {
+      const winner = teams.red.score > teams.blue.score ? 'red' : 'blue';
+      analytics.trackFamilyFeudGameFinished({
+        roomCode,
+        winner,
+        redTeamName: teams.red.name,
+        blueTeamName: teams.blue.name,
+        redTeamScore: teams.red.score,
+        blueTeamScore: teams.blue.score,
+        totalRounds: maxRounds,
+      });
+    }
   };
 
   // Handle play again

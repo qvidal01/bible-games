@@ -15,8 +15,21 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
         person_profiles: 'identified_only',
         capture_pageview: true,
         capture_pageleave: true,
-        advanced_disable_feature_flags: true,
-        advanced_disable_feature_flags_on_first_load: true,
+        // Session Replay
+        disable_session_recording: false,
+        session_recording: {
+          maskAllInputs: false,
+          maskInputFn: (text, element) => {
+            // Only mask password and email fields
+            const type = element?.getAttribute('type');
+            if (type === 'password' || type === 'email') {
+              return '*'.repeat(text.length);
+            }
+            return text;
+          },
+        },
+        // Enable Surveys (requires feature flags to work)
+        enable_heatmaps: true,
       });
     }
   }, []);

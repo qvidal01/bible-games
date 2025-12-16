@@ -6,6 +6,7 @@ import { useGameStore } from '../../lib/gameStore';
 import { getPusherClient, getGameChannel, JEOPARDY_EVENTS as GAME_EVENTS } from '@shared/lib/pusher';
 import { Player, Question, GameState } from '../../types/game';
 import { initSounds, playSound, playFeedback } from '../../lib/sounds';
+import * as analytics from '@shared/lib/analytics';
 import JeopardyBoard from '../../components/JeopardyBoard';
 import QuestionModal from '../../components/QuestionModal';
 import DailyDoubleModal from '../../components/DailyDoubleModal';
@@ -540,6 +541,14 @@ export default function JeopardyGamePage({ params }: { params: Promise<{ roomCod
     if (soundEnabled) playSound('select');
     updateActivity();
 
+    // Track analytics
+    analytics.trackJeopardyGameStarted({
+      roomCode,
+      playerCount: players.length,
+      isTeamMode,
+      categories: categoryIds,
+    });
+
     // Update server-side room status to prevent new joins
     try {
       await fetch(`/api/rooms/${roomCode}`, {
@@ -564,6 +573,16 @@ export default function JeopardyGamePage({ params }: { params: Promise<{ roomCod
       playSound('select');
     }
     updateActivity();
+
+    // Track analytics
+    const category = board?.categories.find(c => c.questions.some(q => q.id === question.id));
+    analytics.trackJeopardyQuestionSelected({
+      roomCode,
+      category: category?.name || 'Unknown',
+      value: question.value,
+      round,
+      isDailyDouble: question.isDailyDouble || false,
+    });
   };
 
   // Handle player buzz
@@ -575,6 +594,13 @@ export default function JeopardyGamePage({ params }: { params: Promise<{ roomCod
     broadcastEvent(GAME_EVENTS.PLAYER_BUZZED, { playerId, time });
     if (soundEnabled) playFeedback('buzz', 100);
     updateActivity();
+
+    // Track analytics
+    analytics.trackJeopardyBuzz({
+      roomCode,
+      playerName,
+      buzzPosition: buzzOrder.length + 1,
+    });
   };
 
   // Handle answer judgment (host only)
@@ -597,6 +623,15 @@ export default function JeopardyGamePage({ params }: { params: Promise<{ roomCod
 
     if (soundEnabled) playSound(correct ? 'correct' : 'wrong');
     updateActivity();
+
+    // Track analytics
+    analytics.trackJeopardyAnswer({
+      roomCode,
+      playerName: playerToScore.name,
+      correct,
+      pointsChange: pointChange,
+      questionValue: currentQuestion.value,
+    });
 
     if (correct || !buzzedPlayer) {
       // Close question if correct OR if self-scoring (no buzzedPlayer)
@@ -657,6 +692,18 @@ export default function JeopardyGamePage({ params }: { params: Promise<{ roomCod
     resolveDailyDouble(correct);
     if (soundEnabled) playSound(correct ? 'correct' : 'wrong');
     broadcastEvent('daily-double-judge', { correct });
+
+    // Track analytics
+    if (dailyDoubleState) {
+      const player = players.find(p => p.id === dailyDoubleState.playerId);
+      analytics.trackJeopardyDailyDouble({
+        roomCode,
+        playerName: player?.name || 'Unknown',
+        wager: dailyDoubleState.wager || 0,
+        correct,
+        round,
+      });
+    }
   };
 
   const handleDailyDoubleClose = () => {
@@ -675,6 +722,16 @@ export default function JeopardyGamePage({ params }: { params: Promise<{ roomCod
   const handleFinishGame = () => {
     setStatus('finished');
     if (soundEnabled) playSound('gameOver');
+
+    // Track analytics
+    const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+    const winner = sortedPlayers[0];
+    analytics.trackJeopardyGameFinished({
+      roomCode,
+      winner: winner?.name || 'Unknown',
+      finalScores: sortedPlayers.map(p => ({ name: p.name, score: p.score })),
+      totalRounds: round,
+    });
   };
 
   // Waiting room retry handler
