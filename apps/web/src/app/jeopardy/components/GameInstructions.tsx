@@ -86,6 +86,10 @@ export default function GameInstructions({ isHost, isTeamMode, compact = false }
                 <span className="text-blue-400 font-bold text-xs bg-blue-500/20 px-1.5 py-0.5 rounded">R2</span>
                 <span><strong>Double Jeopardy</strong> - Round 2 has double point values</span>
               </li>
+              <li className="flex items-start gap-2">
+                <span className="text-pink-400 font-bold text-xs bg-pink-500/20 px-1.5 py-0.5 rounded">TV</span>
+                <span><strong>Projector View</strong> - TV-friendly display for in-person or Zoom games</span>
+              </li>
             </ul>
           </div>
 
@@ -101,8 +105,9 @@ export default function GameInstructions({ isHost, isTeamMode, compact = false }
               <ul className="text-yellow-200/80 text-xs space-y-1">
                 <li>Click dollar values to reveal questions</li>
                 <li>Use Correct/Wrong buttons to judge answers</li>
-                <li>Click &quot;Reveal Answer&quot; if no one knows</li>
-                <li>Allow players time to read before judging</li>
+                <li><strong>View Answer (Host Only)</strong> - Only YOU see the answer, not players!</li>
+                <li>Optionally &quot;Show Answer to All&quot; after judging</li>
+                <li>Use <strong>Projector View</strong> (purple icon) for TV/Zoom display</li>
               </ul>
             </div>
           ) : (
@@ -140,6 +145,14 @@ export default function GameInstructions({ isHost, isTeamMode, compact = false }
               <div className="flex items-center gap-2 text-blue-300">
                 <span className="w-3 h-3 rounded bg-purple-500"></span>
                 Final Jeopardy
+              </div>
+              <div className="flex items-center gap-2 text-blue-300">
+                <span className="w-3 h-3 rounded bg-pink-500"></span>
+                Projector View
+              </div>
+              <div className="flex items-center gap-2 text-blue-300">
+                <span className="w-3 h-3 rounded bg-blue-500"></span>
+                Host-only answer
               </div>
             </div>
           </div>
