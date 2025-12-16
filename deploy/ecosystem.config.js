@@ -22,5 +22,26 @@ module.exports = {
       max_restarts: 10,
       restart_delay: 5000,
     },
+    {
+      name: 'bible-games-webhook',
+      cwd: '/home/appuser/projects/bible-games/deploy',
+      script: 'webhook-server.js',
+      instances: 1,
+      exec_mode: 'fork',
+      watch: false,
+      max_memory_restart: '100M',
+      env: {
+        NODE_ENV: 'production',
+        WEBHOOK_PORT: 9000,
+        // WEBHOOK_SECRET will be set via environment
+      },
+      error_file: '/home/appuser/logs/webhook-error.log',
+      out_file: '/home/appuser/logs/webhook-out.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      merge_logs: true,
+      autorestart: true,
+      max_restarts: 5,
+      restart_delay: 3000,
+    },
   ],
 };
