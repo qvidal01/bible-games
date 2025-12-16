@@ -26,3 +26,12 @@ dist
 .vscode
 *.swp
 *.swo
+
+# Synology NAS metadata
+@eaDir/
+
+# Claude Code
+.claude/
+
+# Large media files in root (already in public folder)
+How_to_Play__Bible_Jeopardy.mp4

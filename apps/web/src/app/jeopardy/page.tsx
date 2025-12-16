@@ -27,6 +27,9 @@ export default function JeopardyHome() {
   const [publicRooms, setPublicRooms] = useState<PublicRoom[]>([]);
   const [loadingRooms, setLoadingRooms] = useState(false);
 
+  // Tutorial video modal
+  const [showTutorial, setShowTutorial] = useState(false);
+
   useEffect(() => {
     initSounds();
   }, []);
@@ -251,7 +254,18 @@ export default function JeopardyHome() {
 
                   {/* How to Play */}
                   <div className="mt-6 pt-4 border-t border-blue-700/50">
-                    <h3 className="text-yellow-400 font-bold text-center mb-3">How to Play</h3>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-yellow-400 font-bold">How to Play</h3>
+                      <button
+                        onClick={() => setShowTutorial(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-sm font-semibold rounded-lg transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                        Watch Tutorial
+                      </button>
+                    </div>
                     <div className="bg-blue-900/30 rounded-lg p-4 text-sm">
                       <ul className="text-blue-200 space-y-2">
                         <li className="flex gap-2">
@@ -457,6 +471,54 @@ export default function JeopardyHome() {
             </>
           )}
         </div>
+
+        {/* Tutorial Video Modal */}
+        {showTutorial && (
+          <div
+            className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowTutorial(false)}
+          >
+            <div
+              className="relative w-full max-w-4xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShowTutorial(false)}
+                className="absolute -top-12 right-0 text-white hover:text-yellow-400 transition-colors flex items-center gap-2"
+              >
+                <span className="text-sm">Close</span>
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Video Container */}
+              <div className="bg-blue-950 rounded-2xl overflow-hidden border-4 border-yellow-500 shadow-2xl">
+                <div className="bg-blue-900 px-6 py-3 flex items-center gap-3">
+                  <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  <h3 className="text-yellow-400 font-bold text-lg">How to Play Bible Jeopardy</h3>
+                </div>
+                <video
+                  className="w-full aspect-video"
+                  controls
+                  autoPlay
+                  playsInline
+                  src="/videos/how-to-play-bible-jeopardy.mp4"
+                >
+                  Your browser does not support the video tag.
+                </video>
+                <div className="p-4 bg-blue-900/50 text-center">
+                  <p className="text-blue-300 text-sm">
+                    5-minute tutorial covering all game features and rules
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ErrorBoundary>
   );

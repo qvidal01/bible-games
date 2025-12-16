@@ -13,7 +13,7 @@ interface QuestionModalProps {
   showAnswer: boolean;
   onBuzz: () => void;
   onJudge: (correct: boolean) => void;
-  onRevealAnswer: () => void;
+  onRevealAnswer: (showToAll?: boolean) => void;
   onClose: () => void;
   canBuzz: boolean;
   playerId: string;
@@ -227,8 +227,22 @@ export default function QuestionModal({
           </div>
         )}
 
-        {/* Answer (when revealed) */}
-        {showAnswer && (
+        {/* Answer (when revealed) - Host Only indicator when not shared */}
+        {showAnswer && isHost && (
+          <div className="px-8 pb-4">
+            <div className="bg-green-800/50 border-2 border-green-500 rounded-lg p-6 relative">
+              <div className="absolute -top-3 left-4 bg-green-700 px-2 py-0.5 rounded text-xs text-green-200 font-semibold">
+                HOST ONLY VIEW
+              </div>
+              <p className="text-xl md:text-2xl text-green-300 text-center font-medium">
+                {question.answer}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Answer shown to all players (only when host shares it) */}
+        {showAnswer && !isHost && (
           <div className="px-8 pb-4">
             <div className="bg-green-800/50 border-2 border-green-500 rounded-lg p-6">
               <p className="text-xl md:text-2xl text-green-300 text-center font-medium">
@@ -304,56 +318,73 @@ export default function QuestionModal({
                 </div>
               )}
 
-              {/* Reveal answer button */}
+              {/* View answer button (host only - not shown to players) */}
               {!showAnswer && (
-                <button
-                  onClick={onRevealAnswer}
-                  className="w-full py-3 bg-blue-700 hover:bg-blue-600 text-white text-lg font-semibold rounded-xl transition-colors
-                             focus:outline-none focus:ring-4 focus:ring-blue-400"
-                >
-                  Reveal Answer
-                </button>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => onRevealAnswer(false)}
+                    className="w-full py-3 bg-blue-700 hover:bg-blue-600 text-white text-lg font-semibold rounded-xl transition-colors
+                               focus:outline-none focus:ring-4 focus:ring-blue-400 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    View Answer (Host Only)
+                  </button>
+                  <p className="text-center text-blue-400 text-xs">
+                    Only you can see the answer - players cannot see it
+                  </p>
+                </div>
               )}
 
-              {/* No one buzzed - just close and return to board */}
-              {showAnswer && !buzzedPlayer && (
-                <button
-                  onClick={onClose}
-                  className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-blue-900 text-xl font-bold rounded-xl transition-colors
-                             focus:outline-none focus:ring-4 focus:ring-yellow-300"
-                >
-                  Back to Board
-                </button>
-              )}
-
-              {/* Judging buttons after answer revealed with a buzzer */}
-              {showAnswer && buzzedPlayer && (
+              {/* After viewing answer - show options */}
+              {showAnswer && (
                 <div className="space-y-3">
-                  <p className="text-center text-blue-300 text-sm">Did {buzzedPlayer.name} get it right?</p>
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => handleJudge(true)}
-                      className="flex-1 py-4 bg-green-600 hover:bg-green-500 text-white text-xl font-bold rounded-xl transition-colors
-                                 focus:outline-none focus:ring-4 focus:ring-green-400"
-                      aria-label={`Mark ${buzzedPlayer.name}'s answer as correct, adding $${question.value}`}
-                    >
-                      Correct (+${question.value})
-                    </button>
-                    <button
-                      onClick={() => handleJudge(false)}
-                      className="flex-1 py-4 bg-red-600 hover:bg-red-500 text-white text-xl font-bold rounded-xl transition-colors
-                                 focus:outline-none focus:ring-4 focus:ring-red-400"
-                      aria-label={`Mark ${buzzedPlayer.name}'s answer as wrong, subtracting $${question.value}`}
-                    >
-                      Wrong (-${question.value})
-                    </button>
-                  </div>
+                  {/* Judging buttons */}
+                  {buzzedPlayer && (
+                    <>
+                      <p className="text-center text-blue-300 text-sm">Did {buzzedPlayer.name} get it right?</p>
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => handleJudge(true)}
+                          className="flex-1 py-4 bg-green-600 hover:bg-green-500 text-white text-xl font-bold rounded-xl transition-colors
+                                     focus:outline-none focus:ring-4 focus:ring-green-400"
+                          aria-label={`Mark ${buzzedPlayer.name}'s answer as correct, adding $${question.value}`}
+                        >
+                          Correct (+${question.value})
+                        </button>
+                        <button
+                          onClick={() => handleJudge(false)}
+                          className="flex-1 py-4 bg-red-600 hover:bg-red-500 text-white text-xl font-bold rounded-xl transition-colors
+                                     focus:outline-none focus:ring-4 focus:ring-red-400"
+                          aria-label={`Mark ${buzzedPlayer.name}'s answer as wrong, subtracting $${question.value}`}
+                        >
+                          Wrong (-${question.value})
+                        </button>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Show to all players button (optional) */}
+                  <button
+                    onClick={() => onRevealAnswer(true)}
+                    className="w-full py-2 bg-purple-700 hover:bg-purple-600 text-white text-sm font-semibold rounded-xl transition-colors
+                               focus:outline-none focus:ring-4 focus:ring-purple-400 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Show Answer to All Players
+                  </button>
+
+                  {/* Back to board */}
                   <button
                     onClick={onClose}
-                    className="w-full py-3 bg-blue-700 hover:bg-blue-600 text-white text-lg font-semibold rounded-xl transition-colors
-                               focus:outline-none focus:ring-4 focus:ring-blue-400"
+                    className={`w-full py-3 ${buzzedPlayer ? 'bg-blue-700 hover:bg-blue-600' : 'bg-yellow-500 hover:bg-yellow-400 text-blue-900'} text-white text-lg font-semibold rounded-xl transition-colors
+                               focus:outline-none focus:ring-4 focus:ring-blue-400`}
                   >
-                    Skip (no points)
+                    {buzzedPlayer ? 'Skip (no points)' : 'Back to Board'}
                   </button>
                 </div>
               )}

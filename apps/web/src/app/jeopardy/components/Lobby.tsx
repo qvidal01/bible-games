@@ -120,7 +120,7 @@ export default function Lobby({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 justify-center">
+        <div className="flex flex-wrap gap-3 justify-center">
           <button
             onClick={() => setShowQR(!showQR)}
             className="px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors"
@@ -136,6 +136,18 @@ export default function Lobby({
             </svg>
             Share
           </button>
+          {isHost && (
+            <button
+              onClick={() => window.open(`/jeopardy/spectate/${roomCode}`, '_blank')}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
+              title="Open a TV-friendly view to share on Zoom or display on a projector"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Projector View
+            </button>
+          )}
         </div>
 
         {/* QR Code */}
