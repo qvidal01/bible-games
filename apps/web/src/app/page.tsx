@@ -119,6 +119,8 @@ export default function Home() {
           <h2 className="text-2xl font-bold text-yellow-400 text-center mb-6">Choose Your Game</h2>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {/* === AVAILABLE GAMES === */}
+
             {/* Jeopardy Card */}
             <div
               onClick={() => router.push('/jeopardy')}
@@ -182,6 +184,116 @@ export default function Home() {
                 </span>
               </div>
             </div>
+
+            {/* Bible Tic Tac Toe Card */}
+            <div
+              onClick={() => router.push('/tic-tac-toe')}
+              className="game-card bg-gradient-to-br from-orange-700 to-orange-900 rounded-2xl p-6 border-2 border-orange-500 cursor-pointer"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-yellow-500 rounded-xl flex items-center justify-center">
+                  {/* Tic Tac Toe Icon */}
+                  <svg className="w-9 h-9 text-orange-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 6l4 4m0-4l-4 4" />
+                    <circle cx="17" cy="8" r="3" strokeWidth={2} fill="none" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 16l4 4m0-4l-4 4" />
+                    <circle cx="17" cy="18" r="3" strokeWidth={2} fill="none" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Bible Tic Tac Toe</h3>
+                  <p className="text-orange-300">Answer to claim your spot!</p>
+                </div>
+              </div>
+              <ul className="text-orange-200 text-sm space-y-1 mb-4">
+                <li>• Answer trivia to place X or O</li>
+                <li>• Easy, Medium, Hard difficulty</li>
+                <li>• Quick 5-10 minute matches</li>
+                <li>• Best of 3 or Best of 5 rounds</li>
+                <li>• 50+ Bible trivia questions</li>
+              </ul>
+              <div className="flex items-center justify-between">
+                <div className="text-yellow-400 font-semibold text-xs leading-tight">
+                  <div>2 players (1v1)</div>
+                  <div className="text-yellow-400/70">Quick & fun!</div>
+                </div>
+                <span className="bg-yellow-500 text-orange-900 px-4 py-2 rounded-lg font-bold">
+                  PLAY
+                </span>
+              </div>
+            </div>
+
+            {/* Bible Memory Match Card */}
+            <div
+              onClick={() => router.push('/memory-match')}
+              className="game-card bg-gradient-to-br from-pink-700 to-purple-900 rounded-2xl p-6 border-2 border-pink-500 cursor-pointer"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-yellow-500 rounded-xl flex items-center justify-center">
+                  {/* Memory Match Icon */}
+                  <svg className="w-9 h-9 text-pink-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="9" rx="1" strokeWidth={2} />
+                    <rect x="14" y="3" width="7" height="9" rx="1" strokeWidth={2} />
+                    <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth={2} />
+                    <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth={2} />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Bible Memory Match</h3>
+                  <p className="text-pink-300">Find the matching pairs!</p>
+                </div>
+              </div>
+              <ul className="text-pink-200 text-sm space-y-1 mb-4">
+                <li>• Match Bible character pairs</li>
+                <li>• 36 characters with emojis</li>
+                <li>• 4x4, 4x6, or 6x6 grid sizes</li>
+                <li>• Great for kids & families</li>
+                <li>• Optional name hints for easier play</li>
+              </ul>
+              <div className="flex items-center justify-between">
+                <div className="text-yellow-400 font-semibold text-xs leading-tight">
+                  <div>2-4 players</div>
+                  <div className="text-yellow-400/70">Kid-friendly!</div>
+                </div>
+                <span className="bg-yellow-500 text-pink-900 px-4 py-2 rounded-lg font-bold">
+                  PLAY
+                </span>
+              </div>
+            </div>
+
+            {/* Bible Go Fish Card */}
+            <div
+              onClick={() => router.push('/go-fish')}
+              className="game-card bg-gradient-to-br from-cyan-700 to-blue-900 rounded-2xl p-6 border-2 border-cyan-500 cursor-pointer"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-yellow-500 rounded-xl flex items-center justify-center">
+                  <span className="text-3xl">🐟</span>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Bible Go Fish</h3>
+                  <p className="text-cyan-300">Collect character sets!</p>
+                </div>
+              </div>
+              <ul className="text-cyan-200 text-sm space-y-1 mb-4">
+                <li>• 8 Bible character categories</li>
+                <li>• Prophets, Apostles, Kings & more</li>
+                <li>• Ask players for matching cards</li>
+                <li>• Collect sets of 4 to score</li>
+                <li>• Classic card game fun!</li>
+              </ul>
+              <div className="flex items-center justify-between">
+                <div className="text-yellow-400 font-semibold text-xs leading-tight">
+                  <div>2-4 players</div>
+                  <div className="text-yellow-400/70">Family favorite!</div>
+                </div>
+                <span className="bg-yellow-500 text-cyan-900 px-4 py-2 rounded-lg font-bold">
+                  PLAY
+                </span>
+              </div>
+            </div>
+
+            {/* === COMING SOON GAMES === */}
 
             {/* Kids Bible Trivia - Coming Soon */}
             <div className="relative game-card bg-gradient-to-br from-green-700 to-green-900 rounded-2xl p-6 border-2 border-green-500/50 opacity-90">
@@ -292,114 +404,6 @@ export default function Home() {
                 </div>
                 <span className="bg-teal-600/50 text-teal-200 px-4 py-2 rounded-lg font-bold border border-teal-500/50">
                   SOON
-                </span>
-              </div>
-            </div>
-
-            {/* Bible Tic Tac Toe Card */}
-            <div
-              onClick={() => router.push('/tic-tac-toe')}
-              className="game-card bg-gradient-to-br from-orange-700 to-orange-900 rounded-2xl p-6 border-2 border-orange-500 cursor-pointer"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 bg-yellow-500 rounded-xl flex items-center justify-center">
-                  {/* Tic Tac Toe Icon */}
-                  <svg className="w-9 h-9 text-orange-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 6l4 4m0-4l-4 4" />
-                    <circle cx="17" cy="8" r="3" strokeWidth={2} fill="none" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 16l4 4m0-4l-4 4" />
-                    <circle cx="17" cy="18" r="3" strokeWidth={2} fill="none" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white">Bible Tic Tac Toe</h3>
-                  <p className="text-orange-300">Answer to claim your spot!</p>
-                </div>
-              </div>
-              <ul className="text-orange-200 text-sm space-y-1 mb-4">
-                <li>• Answer trivia to place X or O</li>
-                <li>• Easy, Medium, Hard difficulty</li>
-                <li>• Quick 5-10 minute matches</li>
-                <li>• Best of 3 or Best of 5 rounds</li>
-                <li>• 50+ Bible trivia questions</li>
-              </ul>
-              <div className="flex items-center justify-between">
-                <div className="text-yellow-400 font-semibold text-xs leading-tight">
-                  <div>2 players (1v1)</div>
-                  <div className="text-yellow-400/70">Quick & fun!</div>
-                </div>
-                <span className="bg-yellow-500 text-orange-900 px-4 py-2 rounded-lg font-bold">
-                  PLAY
-                </span>
-              </div>
-            </div>
-
-            {/* Bible Memory Match Card */}
-            <div
-              onClick={() => router.push('/memory-match')}
-              className="game-card bg-gradient-to-br from-pink-700 to-purple-900 rounded-2xl p-6 border-2 border-pink-500 cursor-pointer"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 bg-yellow-500 rounded-xl flex items-center justify-center">
-                  {/* Memory Match Icon */}
-                  <svg className="w-9 h-9 text-pink-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <rect x="3" y="3" width="7" height="9" rx="1" strokeWidth={2} />
-                    <rect x="14" y="3" width="7" height="9" rx="1" strokeWidth={2} />
-                    <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth={2} />
-                    <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth={2} />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white">Bible Memory Match</h3>
-                  <p className="text-pink-300">Find the matching pairs!</p>
-                </div>
-              </div>
-              <ul className="text-pink-200 text-sm space-y-1 mb-4">
-                <li>• Match Bible character pairs</li>
-                <li>• 36 characters with emojis</li>
-                <li>• 4x4, 4x6, or 6x6 grid sizes</li>
-                <li>• Great for kids & families</li>
-                <li>• Optional name hints for easier play</li>
-              </ul>
-              <div className="flex items-center justify-between">
-                <div className="text-yellow-400 font-semibold text-xs leading-tight">
-                  <div>2-4 players</div>
-                  <div className="text-yellow-400/70">Kid-friendly!</div>
-                </div>
-                <span className="bg-yellow-500 text-pink-900 px-4 py-2 rounded-lg font-bold">
-                  PLAY
-                </span>
-              </div>
-            </div>
-
-            {/* Bible Go Fish Card */}
-            <div
-              onClick={() => router.push('/go-fish')}
-              className="game-card bg-gradient-to-br from-cyan-700 to-blue-900 rounded-2xl p-6 border-2 border-cyan-500 cursor-pointer"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 bg-yellow-500 rounded-xl flex items-center justify-center">
-                  <span className="text-3xl">🐟</span>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white">Bible Go Fish</h3>
-                  <p className="text-cyan-300">Collect character sets!</p>
-                </div>
-              </div>
-              <ul className="text-cyan-200 text-sm space-y-1 mb-4">
-                <li>• 8 Bible character categories</li>
-                <li>• Prophets, Apostles, Kings & more</li>
-                <li>• Ask players for matching cards</li>
-                <li>• Collect sets of 4 to score</li>
-                <li>• Classic card game fun!</li>
-              </ul>
-              <div className="flex items-center justify-between">
-                <div className="text-yellow-400 font-semibold text-xs leading-tight">
-                  <div>2-4 players</div>
-                  <div className="text-yellow-400/70">Family favorite!</div>
-                </div>
-                <span className="bg-yellow-500 text-cyan-900 px-4 py-2 rounded-lg font-bold">
-                  PLAY
                 </span>
               </div>
             </div>
