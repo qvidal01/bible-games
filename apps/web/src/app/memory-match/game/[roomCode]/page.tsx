@@ -240,6 +240,8 @@ export default function MemoryMatchGamePage({ params }: { params: Promise<{ room
     const newState = {
       status: 'playing' as const,
       cards: newCards,
+      gridSize: gridSize,
+      showHints: showHints,
       currentPlayerIndex: 0,
       firstCard: null,
       secondCard: null,
