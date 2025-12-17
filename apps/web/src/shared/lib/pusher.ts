@@ -54,6 +54,10 @@ export const SHARED_EVENTS = {
 
   // Buzz mechanics
   BUZZ_RESET: 'buzz-reset',
+
+  // Inactivity warnings
+  INACTIVITY_WARNING: 'inactivity-warning',
+  INACTIVITY_TIMEOUT: 'inactivity-timeout',
 } as const;
 
 // Jeopardy-specific events

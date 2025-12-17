@@ -14,6 +14,7 @@ import StrikeDisplay from '../../components/StrikeDisplay';
 import GameOver from '../../components/GameOver';
 import HostDisconnectedOverlay from '../../components/HostDisconnectedOverlay';
 import GameEndedOverlay from '../../components/GameEndedOverlay';
+import InactivityWarning from '@shared/components/InactivityWarning';
 import FaceOffBuzzNotification from '../../components/FaceOffBuzzNotification';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { getPusherClient, getGameChannel, FAMILY_FEUD_EVENTS } from '@shared/lib/pusher';
@@ -762,6 +763,14 @@ export default function FamilyFeudGamePage({ params }: { params: Promise<{ roomC
             />
           )}
         </main>
+
+        {/* Inactivity Warning (server-side) */}
+        {status !== 'lobby' && (
+          <InactivityWarning
+            roomCode={roomCode}
+            isHost={isHost}
+          />
+        )}
 
         {/* Host Disconnected Overlay */}
         {hostDisconnected && hostDisconnectedAt && !gameEnded && !isHost && (

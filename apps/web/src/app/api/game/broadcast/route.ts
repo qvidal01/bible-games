@@ -3,6 +3,7 @@ import { pusherServer, getGameChannel } from '@shared/lib/pusher';
 import { broadcastEventSchema } from '@shared/lib/validation';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import { resetActivity } from '@shared/lib/roomStore';
 
 // Rate limiting (20 requests per second per IP)
 let ratelimit: Ratelimit | null = null;
@@ -45,6 +46,11 @@ export async function POST(req: NextRequest) {
     }
 
     const { roomCode, event, data } = result.data;
+
+    // Reset activity timer on any game action (except inactivity warnings themselves)
+    if (!event.startsWith('inactivity-')) {
+      resetActivity(roomCode);
+    }
 
     // Broadcast to the game channel
     const channel = getGameChannel(roomCode);

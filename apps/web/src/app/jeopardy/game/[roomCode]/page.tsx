@@ -24,6 +24,7 @@ import HostDisconnectedOverlay from '../../components/HostDisconnectedOverlay';
 import GameEndedOverlay from '../../components/GameEndedOverlay';
 import InvitePanel from '@shared/components/InvitePanel';
 import BuzzNotification from '../../components/BuzzNotification';
+import InactivityWarning from '@shared/components/InactivityWarning';
 
 export default function JeopardyGamePage({ params }: { params: Promise<{ roomCode: string }> }) {
   const { roomCode } = use(params);
@@ -1037,6 +1038,15 @@ export default function JeopardyGamePage({ params }: { params: Promise<{ roomCod
               </div>
             </div>
           </div>
+        )}
+
+        {/* Inactivity Warning (server-side) */}
+        {!isStudyMode && status !== 'lobby' && (
+          <InactivityWarning
+            roomCode={roomCode}
+            isHost={isHost}
+            onDismiss={updateActivity}
+          />
         )}
 
         {/* Host Disconnected Overlay */}

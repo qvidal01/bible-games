@@ -506,6 +506,7 @@ export default function JeopardyHome() {
                   controls
                   autoPlay
                   playsInline
+                  poster="/videos/how-to-play-thumbnail.jpg"
                   src="/videos/how-to-play-bible-jeopardy.mp4"
                 >
                   Your browser does not support the video tag.

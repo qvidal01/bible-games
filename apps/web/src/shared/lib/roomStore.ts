@@ -17,13 +17,20 @@ export interface ServerRoom {
   playerCount: number;
   status: 'lobby' | 'playing' | 'finished';
   maxPlayers: number;
+  // Inactivity tracking
+  warningLevel: 0 | 1 | 2;  // 0=none, 1=first warning sent, 2=final warning sent
 }
 
 // In-memory store (replace with Redis for production)
 const rooms = new Map<string, ServerRoom>();
 
-// Room TTL: 4 hours
-const ROOM_TTL = 4 * 60 * 60 * 1000;
+// Room TTL: 90 minutes max session length
+const ROOM_TTL = 90 * 60 * 1000;
+
+// Inactivity timeouts
+const INACTIVITY_WARNING_1 = 10 * 60 * 1000;  // First warning at 10 min
+const INACTIVITY_WARNING_2 = 20 * 60 * 1000;  // Second warning at 20 min
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000;    // End game at 30 min
 
 // Max players per room
 const DEFAULT_MAX_PLAYERS = 10;
@@ -63,10 +70,107 @@ export function createRoom(
     playerCount: 1,
     status: 'lobby',
     maxPlayers: options.maxPlayers || DEFAULT_MAX_PLAYERS,
+    warningLevel: 0,
   };
   rooms.set(code, room);
   return room;
 }
+
+// Reset activity timer (call this on any user action)
+export function resetActivity(code: string): void {
+  const room = rooms.get(code);
+  if (room) {
+    room.lastActivity = Date.now();
+    room.warningLevel = 0;  // Reset warnings on activity
+    rooms.set(code, room);
+  }
+}
+
+// Check inactivity status for a room
+export type InactivityStatus = 'active' | 'warning1' | 'warning2' | 'timeout' | 'expired';
+
+export function checkInactivity(code: string): { status: InactivityStatus; minutesInactive: number } {
+  const room = rooms.get(code);
+  if (!room) return { status: 'expired', minutesInactive: 0 };
+
+  const now = Date.now();
+  const inactiveTime = now - room.lastActivity;
+  const minutesInactive = Math.floor(inactiveTime / 60000);
+
+  // Check session expiration (90 min total)
+  if (now > room.expiresAt) {
+    return { status: 'expired', minutesInactive };
+  }
+
+  // Check inactivity thresholds
+  if (inactiveTime >= INACTIVITY_TIMEOUT) {
+    return { status: 'timeout', minutesInactive };
+  }
+  if (inactiveTime >= INACTIVITY_WARNING_2) {
+    return { status: 'warning2', minutesInactive };
+  }
+  if (inactiveTime >= INACTIVITY_WARNING_1) {
+    return { status: 'warning1', minutesInactive };
+  }
+
+  return { status: 'active', minutesInactive };
+}
+
+// Get rooms that need warnings or should be ended
+export function getRoomsNeedingAction(): {
+  needsWarning1: ServerRoom[];
+  needsWarning2: ServerRoom[];
+  needsTimeout: ServerRoom[];
+  needsExpire: ServerRoom[];
+} {
+  const now = Date.now();
+  const result = {
+    needsWarning1: [] as ServerRoom[],
+    needsWarning2: [] as ServerRoom[],
+    needsTimeout: [] as ServerRoom[],
+    needsExpire: [] as ServerRoom[],
+  };
+
+  rooms.forEach((room) => {
+    const inactiveTime = now - room.lastActivity;
+
+    // Check session expiration
+    if (now > room.expiresAt) {
+      result.needsExpire.push(room);
+      return;
+    }
+
+    // Check inactivity (only for active games, not lobby)
+    if (room.status === 'playing') {
+      if (inactiveTime >= INACTIVITY_TIMEOUT) {
+        result.needsTimeout.push(room);
+      } else if (inactiveTime >= INACTIVITY_WARNING_2 && room.warningLevel < 2) {
+        result.needsWarning2.push(room);
+      } else if (inactiveTime >= INACTIVITY_WARNING_1 && room.warningLevel < 1) {
+        result.needsWarning1.push(room);
+      }
+    }
+  });
+
+  return result;
+}
+
+// Mark warning as sent
+export function markWarningSent(code: string, level: 1 | 2): void {
+  const room = rooms.get(code);
+  if (room) {
+    room.warningLevel = level;
+    rooms.set(code, room);
+  }
+}
+
+// Export timeout constants for use in other files
+export const TIMEOUTS = {
+  ROOM_TTL,
+  INACTIVITY_WARNING_1,
+  INACTIVITY_WARNING_2,
+  INACTIVITY_TIMEOUT,
+};
 
 // Get public rooms (for room browser)
 export function getPublicRooms(gameType?: GameType): ServerRoom[] {
