@@ -108,3 +108,14 @@ export const TIC_TAC_TOE_EVENTS = {
   TIMER_TICK: 'timer-tick',
   TIME_UP: 'time-up',
 } as const;
+
+// Memory Match-specific events
+export const MEMORY_MATCH_EVENTS = {
+  ...SHARED_EVENTS,
+  CARD_FLIPPED: 'card-flipped',
+  MATCH_FOUND: 'match-found',
+  NO_MATCH: 'no-match',
+  CARDS_RESET: 'cards-reset',
+  TURN_CHANGED: 'turn-changed',
+  GAME_OVER: 'game-over',
+} as const;

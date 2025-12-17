@@ -72,6 +72,8 @@ export default function Home() {
         return 'VS';
       case 'tic-tac-toe':
         return 'XO';
+      case 'memory-match':
+        return '🎴';
       default:
         return '?';
     }
@@ -85,6 +87,8 @@ export default function Home() {
         return 'from-red-600 to-red-800';
       case 'tic-tac-toe':
         return 'from-orange-600 to-orange-800';
+      case 'memory-match':
+        return 'from-pink-600 to-purple-800';
       default:
         return 'from-gray-600 to-gray-800';
     }
@@ -321,6 +325,44 @@ export default function Home() {
                   <div className="text-yellow-400/70">Quick & fun!</div>
                 </div>
                 <span className="bg-yellow-500 text-orange-900 px-4 py-2 rounded-lg font-bold">
+                  PLAY
+                </span>
+              </div>
+            </div>
+
+            {/* Bible Memory Match Card */}
+            <div
+              onClick={() => router.push('/memory-match')}
+              className="game-card bg-gradient-to-br from-pink-700 to-purple-900 rounded-2xl p-6 border-2 border-pink-500 cursor-pointer"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-yellow-500 rounded-xl flex items-center justify-center">
+                  {/* Memory Match Icon */}
+                  <svg className="w-9 h-9 text-pink-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="9" rx="1" strokeWidth={2} />
+                    <rect x="14" y="3" width="7" height="9" rx="1" strokeWidth={2} />
+                    <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth={2} />
+                    <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth={2} />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Bible Memory Match</h3>
+                  <p className="text-pink-300">Find the matching pairs!</p>
+                </div>
+              </div>
+              <ul className="text-pink-200 text-sm space-y-1 mb-4">
+                <li>• Match Bible character pairs</li>
+                <li>• 36 characters with emojis</li>
+                <li>• 4x4, 4x6, or 6x6 grid sizes</li>
+                <li>• Great for kids & families</li>
+                <li>• Optional name hints for easier play</li>
+              </ul>
+              <div className="flex items-center justify-between">
+                <div className="text-yellow-400 font-semibold text-xs leading-tight">
+                  <div>2-4 players</div>
+                  <div className="text-yellow-400/70">Kid-friendly!</div>
+                </div>
+                <span className="bg-yellow-500 text-pink-900 px-4 py-2 rounded-lg font-bold">
                   PLAY
                 </span>
               </div>
