@@ -500,9 +500,19 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="text-center py-8 px-4 border-t border-blue-800">
-          <p className="text-blue-400 text-sm mb-3">
-            Based on teachings from jw.org
-          </p>
+          {/* Disclaimer */}
+          <div className="max-w-3xl mx-auto mb-6 p-4 bg-blue-950/50 rounded-lg border border-blue-700/50">
+            <h4 className="text-yellow-400 font-semibold text-sm mb-2">Disclaimer</h4>
+            <p className="text-blue-300 text-xs leading-relaxed">
+              This is <strong>not</strong> an official website, program, or app of Jehovah's Witnesses.
+              We are not affiliated with, endorsed by, or connected to JW.org or the Watchtower Bible and Tract Society of New York, Inc.
+              While team members are Jehovah's Witnesses, all content, ideas, and opinions expressed here are our own and do not
+              represent the official views of the organization. If you find any incorrect information in our trivia questions,
+              please <a href="mailto:info@aiqso.io?subject=Bible%20Games%20Content%20Correction" className="text-yellow-400 hover:underline">let us know</a> and
+              we will do our best to correct it promptly.
+            </p>
+          </div>
+
           <div className="flex items-center justify-center gap-4">
             <a
               href="mailto:info@aiqso.io?subject=Bible%20Games%20Feedback"
