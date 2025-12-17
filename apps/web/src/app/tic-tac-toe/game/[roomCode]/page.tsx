@@ -539,6 +539,8 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
                 {isHost && (
                   <button
                     onClick={() => {
+                      // Get current players with their existing symbols
+                      const currentPlayers = useGameStore.getState().players;
                       const newState = {
                         status: 'playing' as const,
                         board: [...EMPTY_BOARD] as BoardState,
@@ -548,9 +550,14 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
                         currentRound: 1,
                         winner: null,
                         matchWinner: null,
+                        selectedCell: null,
+                        currentQuestion: null,
+                        playerAnswer: null,
+                        answerCorrect: null,
+                        players: currentPlayers, // Preserve players with their symbols
                       };
                       updateGameState(newState);
-                      broadcast(TIC_TAC_TOE_EVENTS.NEW_ROUND, { newState });
+                      broadcast(TIC_TAC_TOE_EVENTS.GAME_STATE_UPDATE, newState);
                     }}
                     className="px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-orange-900 font-bold rounded-lg"
                   >
