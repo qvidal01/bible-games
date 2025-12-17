@@ -103,10 +103,10 @@ export default function Home() {
         </header>
 
         {/* Game Selection */}
-        <section className="max-w-5xl mx-auto px-4 pb-8">
+        <section className="max-w-6xl mx-auto px-4 pb-8">
           <h2 className="text-2xl font-bold text-yellow-400 text-center mb-6">Choose Your Game</h2>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {/* Jeopardy Card */}
             <div
               onClick={() => router.push('/jeopardy')}
@@ -240,6 +240,86 @@ export default function Home() {
                   <div>No spectators</div>
                 </div>
                 <span className="bg-purple-600/50 text-purple-200 px-4 py-2 rounded-lg font-bold border border-purple-500/50">
+                  SOON
+                </span>
+              </div>
+            </div>
+
+            {/* Bible Bingo - Coming Soon */}
+            <div className="relative game-card bg-gradient-to-br from-teal-700 to-teal-900 rounded-2xl p-6 border-2 border-teal-500/50 opacity-90">
+              {/* Coming Soon Banner */}
+              <div className="absolute -top-3 -right-3 z-10">
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-lg transform rotate-12 animate-pulse">
+                  COMING SOON
+                </div>
+              </div>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-yellow-500/80 rounded-xl flex items-center justify-center">
+                  {/* Bingo Grid Icon */}
+                  <svg className="w-9 h-9 text-teal-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 9h16M4 13h16M4 17h16M9 4v16M14 4v16" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Bible Bingo</h3>
+                  <p className="text-teal-300">Match scriptures to win!</p>
+                </div>
+              </div>
+              <ul className="text-teal-200 text-sm space-y-1 mb-4">
+                <li>• Scripture-based bingo cards</li>
+                <li>• Multiple card patterns</li>
+                <li>• Auto-called verses</li>
+                <li>• Perfect for all ages</li>
+                <li>• Printable cards option</li>
+              </ul>
+              <div className="flex items-center justify-between">
+                <div className="text-yellow-400/70 font-semibold text-xs leading-tight">
+                  <div>2-30 players</div>
+                  <div>Great for groups!</div>
+                </div>
+                <span className="bg-teal-600/50 text-teal-200 px-4 py-2 rounded-lg font-bold border border-teal-500/50">
+                  SOON
+                </span>
+              </div>
+            </div>
+
+            {/* Bible Tic Tac Toe - Coming Soon */}
+            <div className="relative game-card bg-gradient-to-br from-orange-700 to-orange-900 rounded-2xl p-6 border-2 border-orange-500/50 opacity-90">
+              {/* Coming Soon Banner */}
+              <div className="absolute -top-3 -right-3 z-10">
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-lg transform rotate-12 animate-pulse">
+                  COMING SOON
+                </div>
+              </div>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-yellow-500/80 rounded-xl flex items-center justify-center">
+                  {/* Tic Tac Toe Icon */}
+                  <svg className="w-9 h-9 text-orange-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 6l4 4m0-4l-4 4" />
+                    <circle cx="17" cy="8" r="3" strokeWidth={2} fill="none" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 16l4 4m0-4l-4 4" />
+                    <circle cx="17" cy="18" r="3" strokeWidth={2} fill="none" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Bible Tic Tac Toe</h3>
+                  <p className="text-orange-300">Answer to claim your spot!</p>
+                </div>
+              </div>
+              <ul className="text-orange-200 text-sm space-y-1 mb-4">
+                <li>• Answer trivia to place X or O</li>
+                <li>• Multiple difficulty levels</li>
+                <li>• Quick 5-minute rounds</li>
+                <li>• 1v1 or team battles</li>
+                <li>• Tournament mode</li>
+              </ul>
+              <div className="flex items-center justify-between">
+                <div className="text-yellow-400/70 font-semibold text-xs leading-tight">
+                  <div>2 players or 2 teams</div>
+                  <div>+ spectators</div>
+                </div>
+                <span className="bg-orange-600/50 text-orange-200 px-4 py-2 rounded-lg font-bold border border-orange-500/50">
                   SOON
                 </span>
               </div>
