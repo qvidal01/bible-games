@@ -119,3 +119,15 @@ export const MEMORY_MATCH_EVENTS = {
   TURN_CHANGED: 'turn-changed',
   GAME_OVER: 'game-over',
 } as const;
+
+// Go Fish-specific events
+export const GO_FISH_EVENTS = {
+  ...SHARED_EVENTS,
+  CARD_ASKED: 'card-asked',
+  CARDS_GIVEN: 'cards-given',
+  GO_FISH: 'go-fish',
+  CARD_DRAWN: 'card-drawn',
+  SET_COMPLETED: 'set-completed',
+  TURN_CHANGED: 'turn-changed',
+  GAME_OVER: 'game-over',
+} as const;

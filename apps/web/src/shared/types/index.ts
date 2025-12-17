@@ -1,6 +1,6 @@
 // Shared types for all games
 
-export type GameType = 'jeopardy' | 'family-feud' | 'tic-tac-toe' | 'memory-match';
+export type GameType = 'jeopardy' | 'family-feud' | 'tic-tac-toe' | 'memory-match' | 'go-fish';
 
 // Base player type - games extend this
 export interface BasePlayer {

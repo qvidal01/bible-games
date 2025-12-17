@@ -74,6 +74,8 @@ export default function Home() {
         return 'XO';
       case 'memory-match':
         return '🎴';
+      case 'go-fish':
+        return '🐟';
       default:
         return '?';
     }
@@ -89,6 +91,8 @@ export default function Home() {
         return 'from-orange-600 to-orange-800';
       case 'memory-match':
         return 'from-pink-600 to-purple-800';
+      case 'go-fish':
+        return 'from-cyan-600 to-blue-800';
       default:
         return 'from-gray-600 to-gray-800';
     }
@@ -363,6 +367,38 @@ export default function Home() {
                   <div className="text-yellow-400/70">Kid-friendly!</div>
                 </div>
                 <span className="bg-yellow-500 text-pink-900 px-4 py-2 rounded-lg font-bold">
+                  PLAY
+                </span>
+              </div>
+            </div>
+
+            {/* Bible Go Fish Card */}
+            <div
+              onClick={() => router.push('/go-fish')}
+              className="game-card bg-gradient-to-br from-cyan-700 to-blue-900 rounded-2xl p-6 border-2 border-cyan-500 cursor-pointer"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-yellow-500 rounded-xl flex items-center justify-center">
+                  <span className="text-3xl">🐟</span>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Bible Go Fish</h3>
+                  <p className="text-cyan-300">Collect character sets!</p>
+                </div>
+              </div>
+              <ul className="text-cyan-200 text-sm space-y-1 mb-4">
+                <li>• 8 Bible character categories</li>
+                <li>• Prophets, Apostles, Kings & more</li>
+                <li>• Ask players for matching cards</li>
+                <li>• Collect sets of 4 to score</li>
+                <li>• Classic card game fun!</li>
+              </ul>
+              <div className="flex items-center justify-between">
+                <div className="text-yellow-400 font-semibold text-xs leading-tight">
+                  <div>2-4 players</div>
+                  <div className="text-yellow-400/70">Family favorite!</div>
+                </div>
+                <span className="bg-yellow-500 text-cyan-900 px-4 py-2 rounded-lg font-bold">
                   PLAY
                 </span>
               </div>

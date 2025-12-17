@@ -31,6 +31,7 @@ export default function InvitePanel({ roomCode, gameType = 'jeopardy', compact =
       'family-feud': 'Bible Family Feud',
       'tic-tac-toe': 'Bible Tic Tac Toe',
       'memory-match': 'Bible Memory Match',
+      'go-fish': 'Bible Go Fish',
     };
     const gameName = gameNames[gameType] || 'Bible Games';
     const shareData = {
