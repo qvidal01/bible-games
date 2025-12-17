@@ -6,7 +6,7 @@ import QRCode from 'qrcode';
 interface QRCodeDisplayProps {
   roomCode: string;
   size?: number;
-  gameType?: 'jeopardy' | 'family-feud';
+  gameType?: 'jeopardy' | 'family-feud' | 'tic-tac-toe';
 }
 
 export default function QRCodeDisplay({ roomCode, size = 200, gameType = 'jeopardy' }: QRCodeDisplayProps) {

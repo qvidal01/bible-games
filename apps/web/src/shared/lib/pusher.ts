@@ -91,3 +91,20 @@ export const FAMILY_FEUD_EVENTS = {
   PLAY_OR_PASS: 'play-or-pass',
   NEXT_QUESTION: 'next-question',
 } as const;
+
+// Tic Tac Toe-specific events
+export const TIC_TAC_TOE_EVENTS = {
+  ...SHARED_EVENTS,
+  // Game flow
+  QUESTION_ASKED: 'question-asked',
+  ANSWER_SUBMITTED: 'answer-submitted',
+  ANSWER_JUDGED: 'answer-judged',
+  CELL_CLAIMED: 'cell-claimed',
+  TURN_CHANGED: 'turn-changed',
+  ROUND_WON: 'round-won',
+  ROUND_DRAW: 'round-draw',
+  MATCH_WON: 'match-won',
+  NEW_ROUND: 'new-round',
+  TIMER_TICK: 'timer-tick',
+  TIME_UP: 'time-up',
+} as const;

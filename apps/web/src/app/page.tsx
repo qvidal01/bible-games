@@ -70,6 +70,8 @@ export default function Home() {
         return '?';
       case 'family-feud':
         return 'VS';
+      case 'tic-tac-toe':
+        return 'XO';
       default:
         return '?';
     }
@@ -81,6 +83,8 @@ export default function Home() {
         return 'from-blue-600 to-blue-800';
       case 'family-feud':
         return 'from-red-600 to-red-800';
+      case 'tic-tac-toe':
+        return 'from-orange-600 to-orange-800';
       default:
         return 'from-gray-600 to-gray-800';
     }
@@ -284,16 +288,13 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Bible Tic Tac Toe - Coming Soon */}
-            <div className="relative game-card bg-gradient-to-br from-orange-700 to-orange-900 rounded-2xl p-6 border-2 border-orange-500/50 opacity-90">
-              {/* Coming Soon Banner */}
-              <div className="absolute -top-3 -right-3 z-10">
-                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-lg transform rotate-12 animate-pulse">
-                  COMING SOON
-                </div>
-              </div>
+            {/* Bible Tic Tac Toe Card */}
+            <div
+              onClick={() => router.push('/tic-tac-toe')}
+              className="game-card bg-gradient-to-br from-orange-700 to-orange-900 rounded-2xl p-6 border-2 border-orange-500 cursor-pointer"
+            >
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 bg-yellow-500/80 rounded-xl flex items-center justify-center">
+                <div className="w-16 h-16 bg-yellow-500 rounded-xl flex items-center justify-center">
                   {/* Tic Tac Toe Icon */}
                   <svg className="w-9 h-9 text-orange-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 6l4 4m0-4l-4 4" />
@@ -309,18 +310,18 @@ export default function Home() {
               </div>
               <ul className="text-orange-200 text-sm space-y-1 mb-4">
                 <li>• Answer trivia to place X or O</li>
-                <li>• Multiple difficulty levels</li>
-                <li>• Quick 5-minute rounds</li>
-                <li>• 1v1 or team battles</li>
-                <li>• Tournament mode</li>
+                <li>• Easy, Medium, Hard difficulty</li>
+                <li>• Quick 5-10 minute matches</li>
+                <li>• Best of 3 or Best of 5 rounds</li>
+                <li>• 50+ Bible trivia questions</li>
               </ul>
               <div className="flex items-center justify-between">
-                <div className="text-yellow-400/70 font-semibold text-xs leading-tight">
-                  <div>2 players or 2 teams</div>
-                  <div>+ spectators</div>
+                <div className="text-yellow-400 font-semibold text-xs leading-tight">
+                  <div>2 players (1v1)</div>
+                  <div className="text-yellow-400/70">Quick & fun!</div>
                 </div>
-                <span className="bg-orange-600/50 text-orange-200 px-4 py-2 rounded-lg font-bold border border-orange-500/50">
-                  SOON
+                <span className="bg-yellow-500 text-orange-900 px-4 py-2 rounded-lg font-bold">
+                  PLAY
                 </span>
               </div>
             </div>

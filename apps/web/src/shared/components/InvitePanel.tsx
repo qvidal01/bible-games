@@ -26,7 +26,7 @@ export default function InvitePanel({ roomCode, gameType = 'jeopardy', compact =
 
   const shareGame = async () => {
     const shareUrl = `${window.location.origin}/${gameType}/join/${roomCode}`;
-    const gameName = gameType === 'jeopardy' ? 'Bible Jeopardy' : 'Bible Family Feud';
+    const gameName = gameType === 'jeopardy' ? 'Bible Jeopardy' : gameType === 'family-feud' ? 'Bible Family Feud' : 'Bible Tic Tac Toe';
     const shareData = {
       title: `${gameName} - JW Edition`,
       text: `Join my ${gameName} game! Room code: ${roomCode}`,
