@@ -70,7 +70,10 @@ export const createGameSchema = z.object({
   description: roomDescriptionSchema,
   isPrivate: z.boolean().optional().default(false),
   maxPlayers: z.number().int().min(2).max(15).optional().default(10),
-  gameType: z.enum(['jeopardy', 'family-feud', 'tic-tac-toe', 'memory-match', 'go-fish']).optional().default('jeopardy'),
+  gameType: z
+    .enum(['jeopardy', 'family-feud', 'tic-tac-toe', 'memory-match', 'go-fish', 'kids-trivia'])
+    .optional()
+    .default('jeopardy'),
 });
 
 // Broadcast event validation

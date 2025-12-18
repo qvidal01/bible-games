@@ -70,6 +70,8 @@ export default function Home() {
         return '?';
       case 'family-feud':
         return 'VS';
+      case 'kids-trivia':
+        return '🙂';
       case 'tic-tac-toe':
         return 'XO';
       case 'memory-match':
@@ -87,6 +89,8 @@ export default function Home() {
         return 'from-blue-600 to-blue-800';
       case 'family-feud':
         return 'from-red-600 to-red-800';
+      case 'kids-trivia':
+        return 'from-green-600 to-green-800';
       case 'tic-tac-toe':
         return 'from-orange-600 to-orange-800';
       case 'memory-match':
@@ -295,39 +299,41 @@ export default function Home() {
 
             {/* === COMING SOON GAMES === */}
 
-            {/* Kids Bible Trivia - Coming Soon */}
-            <div className="relative game-card bg-gradient-to-br from-green-700 to-green-900 rounded-2xl p-6 border-2 border-green-500/50 opacity-90">
-              {/* Coming Soon Banner */}
+            {/* Kids Bible Trivia */}
+            <div
+              onClick={() => router.push('/kids-trivia')}
+              className="relative game-card bg-gradient-to-br from-green-700 to-green-900 rounded-2xl p-6 border-2 border-green-500 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition"
+            >
               <div className="absolute -top-3 -right-3 z-10">
-                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-lg transform rotate-12 animate-pulse">
-                  COMING SOON
+                <div className="bg-gradient-to-r from-yellow-300 to-orange-500 text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-lg transform rotate-12">
+                  NEW • BETA
                 </div>
               </div>
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 bg-yellow-500/80 rounded-xl flex items-center justify-center">
+                <div className="w-16 h-16 bg-yellow-500 rounded-xl flex items-center justify-center">
                   <svg className="w-9 h-9 text-green-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-white">Kids Bible Trivia</h3>
-                  <p className="text-green-300">Picture guessing fun!</p>
+                  <p className="text-green-100">Picture clues • Multiple choice • Timed rounds</p>
                 </div>
               </div>
               <ul className="text-green-200 text-sm space-y-1 mb-4">
-                <li>• Picture-based character guessing</li>
-                <li>• Age-appropriate questions</li>
-                <li>• Fun animations and sounds</li>
-                <li>• Multiple difficulty levels</li>
-                <li>• Perfect for family worship</li>
+                <li>• Emoji-style clue cards kids understand</li>
+                <li>• Easy / Medium / Hard modes</li>
+                <li>• Offline practice + online rooms</li>
+                <li>• Gentle sound effects + countdown timer</li>
+                <li>• Great for family worship nights</li>
               </ul>
               <div className="flex items-center justify-between">
-                <div className="text-yellow-400/70 font-semibold text-xs leading-tight">
-                  <div>2-5 players</div>
-                  <div>+ 10 spectators</div>
+                <div className="text-yellow-400 font-semibold text-xs leading-tight">
+                  <div>Solo or 2-5 teams</div>
+                  <div className="text-yellow-400/80">Online: up to 15</div>
                 </div>
-                <span className="bg-green-600/50 text-green-200 px-4 py-2 rounded-lg font-bold border border-green-500/50">
-                  SOON
+                <span className="bg-yellow-400 text-green-900 px-4 py-2 rounded-lg font-bold">
+                  PLAY
                 </span>
               </div>
             </div>

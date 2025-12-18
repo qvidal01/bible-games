@@ -80,6 +80,7 @@ export default function TicTacToeHome() {
       sessionStorage.setItem('playerId', playerId);
       sessionStorage.setItem('playerName', sanitizedName);
       sessionStorage.setItem('isHost', 'true');
+      sessionStorage.setItem('isSpectator', 'false');
       sessionStorage.setItem('ttt-roundsToWin', String(roundsToWin));
       sessionStorage.setItem('ttt-difficulty', difficulty);
 

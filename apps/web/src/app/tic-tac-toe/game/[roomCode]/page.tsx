@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState, use, useCallback } from 'react';
+import { useEffect, useRef, useState, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGameStore } from '../../lib/gameStore';
 import { getPusherClient, getGameChannel, TIC_TAC_TOE_EVENTS } from '@shared/lib/pusher';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import LoadingSpinner from '@shared/components/LoadingSpinner';
 import InvitePanel from '@shared/components/InvitePanel';
+import GameEndedOverlay from '@shared/components/GameEndedOverlay';
 import { Player, WIN_LINES, BoardState, EMPTY_BOARD } from '../../types/game';
 import { getRandomQuestion } from '../../data/questions';
 
@@ -16,6 +17,21 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
   const [isConnected, setIsConnected] = useState(false);
   const [playerId, setPlayerId] = useState<string>('');
   const [isHost, setIsHost] = useState(false);
+  const [isSpectator, setIsSpectator] = useState(false);
+  const [playerName, setPlayerName] = useState('');
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [gameEnded, setGameEnded] = useState(false);
+  const [endHostName, setEndHostName] = useState<string | undefined>(undefined);
+  const [endReason, setEndReason] = useState<'host-ended' | 'host-timeout' | 'inactivity' | 'unknown'>('unknown');
+  const [hostDisconnected, setHostDisconnected] = useState(false);
+
+  const joinedAsPlayerRef = useRef(false);
+  const hostHeartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const hostTimeoutIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastHostHeartbeatRef = useRef<number>(Date.now());
+
+  const HOST_HEARTBEAT_INTERVAL_MS = 10_000;
+  const HOST_HEARTBEAT_TIMEOUT_MS = 30_000;
 
   const {
     status,
@@ -70,6 +86,7 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
     const pid = sessionStorage.getItem('playerId');
     const pname = sessionStorage.getItem('playerName');
     const host = sessionStorage.getItem('isHost') === 'true';
+    const spectator = sessionStorage.getItem('isSpectator') === 'true';
     const storedRounds = sessionStorage.getItem('ttt-roundsToWin');
     const storedDifficulty = sessionStorage.getItem('ttt-difficulty');
 
@@ -79,7 +96,9 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
     }
 
     setPlayerId(pid);
+    setPlayerName(pname);
     setIsHost(host);
+    setIsSpectator(spectator);
     setRoomCode(roomCode);
 
     if (host) {
@@ -88,7 +107,7 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
       if (storedDifficulty) setDifficulty(storedDifficulty as any);
     }
 
-    // Add self to players
+    // Add self to players (spectators don't participate in the turn-based roster)
     const player: Player = {
       id: pid,
       name: pname,
@@ -97,7 +116,10 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
       score: 0,
       connectedAt: Date.now(),
     };
-    addPlayer(player);
+    if (!spectator) {
+      joinedAsPlayerRef.current = true;
+      addPlayer(player);
+    }
 
     // Connect to Pusher
     const pusher = getPusherClient();
@@ -105,8 +127,17 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
 
     channel.bind('pusher:subscription_succeeded', () => {
       setIsConnected(true);
-      // Broadcast join
-      broadcast(TIC_TAC_TOE_EVENTS.PLAYER_JOINED, { player });
+      // Broadcast join (players only)
+      if (!spectator) {
+        broadcast(TIC_TAC_TOE_EVENTS.PLAYER_JOINED, { player });
+      }
+
+      // Request state sync (players + spectators)
+      if (!host) {
+        setTimeout(() => {
+          broadcast(TIC_TAC_TOE_EVENTS.REQUEST_STATE_SYNC, { requesterId: pid }).catch(() => {});
+        }, 400);
+      }
     });
 
     // Handle events
@@ -118,6 +149,9 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
 
     channel.bind(TIC_TAC_TOE_EVENTS.PLAYER_LEFT, (data: { playerId: string }) => {
       removePlayer(data.playerId);
+      if (data.playerId && data.playerId === useGameStore.getState().hostId) {
+        setHostDisconnected(true);
+      }
     });
 
     channel.bind(TIC_TAC_TOE_EVENTS.GAME_STARTED, () => {
@@ -126,6 +160,60 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
 
     channel.bind(TIC_TAC_TOE_EVENTS.GAME_STATE_UPDATE, (data: any) => {
       updateGameState(data);
+    });
+
+    channel.bind(TIC_TAC_TOE_EVENTS.HOST_HEARTBEAT, () => {
+      lastHostHeartbeatRef.current = Date.now();
+      if (hostDisconnected) setHostDisconnected(false);
+    });
+
+    channel.bind(TIC_TAC_TOE_EVENTS.HOST_TRANSFERRED, (data: { newHostId: string; newHostName?: string }) => {
+      if (!data?.newHostId) return;
+      setHostId(data.newHostId);
+      updateGameState({
+        hostId: data.newHostId,
+        players: useGameStore.getState().players.map((p) => ({ ...p, isHost: p.id === data.newHostId })),
+      });
+      setHostDisconnected(false);
+
+      const amIHost = data.newHostId === pid;
+      setIsHost(amIHost);
+      sessionStorage.setItem('isHost', amIHost ? 'true' : 'false');
+    });
+
+    channel.bind(TIC_TAC_TOE_EVENTS.REQUEST_STATE_SYNC, (data: { requesterId: string }) => {
+      if (!host) return;
+      if (!data?.requesterId || data.requesterId === pid) return;
+      const state = useGameStore.getState();
+      broadcast(TIC_TAC_TOE_EVENTS.STATE_SYNC, {
+        targetId: data.requesterId,
+        state: {
+          roomCode: state.roomCode,
+          status: state.status,
+          players: state.players,
+          hostId: state.hostId,
+          board: state.board,
+          currentTurn: state.currentTurn,
+          selectedCell: state.selectedCell,
+          currentQuestion: state.currentQuestion,
+          playerAnswer: state.playerAnswer,
+          answerCorrect: state.answerCorrect,
+          roundsToWin: state.roundsToWin,
+          xWins: state.xWins,
+          oWins: state.oWins,
+          currentRound: state.currentRound,
+          winner: state.winner,
+          matchWinner: state.matchWinner,
+          difficulty: state.difficulty,
+          timerDuration: state.timerDuration,
+          soundEnabled: state.soundEnabled,
+        },
+      }).catch(() => {});
+    });
+
+    channel.bind(TIC_TAC_TOE_EVENTS.STATE_SYNC, (data: { targetId: string; state: any }) => {
+      if (data?.targetId !== pid) return;
+      if (data?.state) updateGameState(data.state);
     });
 
     channel.bind(TIC_TAC_TOE_EVENTS.CELL_CLAIMED, (data: { cellIndex: number; symbol: 'X' | 'O' }) => {
@@ -152,17 +240,72 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
       updateGameState(data.newState);
     });
 
+    channel.bind(TIC_TAC_TOE_EVENTS.GAME_ENDED, (data: { reason?: string; hostName?: string }) => {
+      setGameEnded(true);
+      setEndHostName(data?.hostName);
+      setEndReason((data?.reason as any) || 'unknown');
+      updateGameState({ status: 'finished' as const });
+    });
+
     channel.bind(TIC_TAC_TOE_EVENTS.NEW_ROUND, (data: { newState: any }) => {
       updateGameState(data.newState);
     });
 
     return () => {
-      broadcast(TIC_TAC_TOE_EVENTS.PLAYER_LEFT, { playerId: pid });
+      if (joinedAsPlayerRef.current) {
+        broadcast(TIC_TAC_TOE_EVENTS.PLAYER_LEFT, { playerId: pid });
+      }
+      fetch(`/api/rooms/${roomCode}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'leave', playerId: pid }),
+      }).catch(() => {});
+
       channel.unbind_all();
       pusher.unsubscribe(getGameChannel(roomCode));
+      if (hostHeartbeatIntervalRef.current) clearInterval(hostHeartbeatIntervalRef.current);
+      if (hostTimeoutIntervalRef.current) clearInterval(hostTimeoutIntervalRef.current);
       fullReset();
     };
   }, [roomCode, router]);
+
+  // Host heartbeat + disconnect detection
+  useEffect(() => {
+    if (!isConnected) return;
+
+    if (isHost) {
+      if (hostHeartbeatIntervalRef.current) clearInterval(hostHeartbeatIntervalRef.current);
+      hostHeartbeatIntervalRef.current = setInterval(() => {
+        broadcast(TIC_TAC_TOE_EVENTS.HOST_HEARTBEAT, {}).catch(() => {});
+      }, HOST_HEARTBEAT_INTERVAL_MS);
+    }
+
+    if (hostTimeoutIntervalRef.current) clearInterval(hostTimeoutIntervalRef.current);
+    hostTimeoutIntervalRef.current = setInterval(() => {
+      const age = Date.now() - lastHostHeartbeatRef.current;
+      if (!isHost && age > HOST_HEARTBEAT_TIMEOUT_MS) {
+        setHostDisconnected(true);
+      }
+    }, 1_000);
+
+    return () => {
+      if (hostHeartbeatIntervalRef.current) clearInterval(hostHeartbeatIntervalRef.current);
+      if (hostTimeoutIntervalRef.current) clearInterval(hostTimeoutIntervalRef.current);
+    };
+  }, [isConnected, isHost, broadcast]);
+
+  const handleTakeOverHost = async () => {
+    if (isSpectator) return;
+    setIsHost(true);
+    sessionStorage.setItem('isHost', 'true');
+    setHostId(playerId);
+    updateGameState({
+      hostId: playerId,
+      players: useGameStore.getState().players.map((p) => ({ ...p, isHost: p.id === playerId })),
+    });
+    setHostDisconnected(false);
+    await broadcast(TIC_TAC_TOE_EVENTS.HOST_TRANSFERRED, { newHostId: playerId, newHostName: playerName });
+  };
 
   // Handle cell click
   const handleCellClick = (index: number) => {
@@ -294,6 +437,22 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
     router.push('/tic-tac-toe');
   };
 
+  const handleEndGame = async () => {
+    setShowEndConfirm(false);
+    const hostName = sessionStorage.getItem('playerName') || undefined;
+    setGameEnded(true);
+    setEndHostName(hostName);
+    setEndReason('host-ended');
+    updateGameState({ status: 'finished' as const });
+
+    broadcast(TIC_TAC_TOE_EVENTS.GAME_ENDED, { reason: 'host-ended', hostName }).catch(() => {});
+    fetch(`/api/rooms/${roomCode}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update-status', status: 'finished' }),
+    }).catch(() => {});
+  };
+
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-orange-900 to-orange-800 flex items-center justify-center">
@@ -318,11 +477,43 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
               Leave
             </button>
             <h1 className="text-2xl font-bold text-yellow-400">TIC TAC TOE</h1>
-            <div className="text-orange-300 text-sm">
-              Round {currentRound}
+            <div className="flex items-center gap-2">
+              {isSpectator && (
+                <span className="px-2 py-1 rounded-lg bg-black/20 text-orange-100 text-xs font-semibold">
+                  Spectator
+                </span>
+              )}
+              {isHost && status !== 'lobby' && (
+                <button
+                  onClick={() => setShowEndConfirm(true)}
+                  className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-sm font-semibold"
+                >
+                  End Game
+                </button>
+              )}
+              <div className="text-orange-300 text-sm">Round {currentRound}</div>
             </div>
           </div>
         </div>
+
+        {hostDisconnected && !isHost && (
+          <div className="max-w-2xl mx-auto mb-4">
+            <div className="bg-yellow-500/10 border border-yellow-300/30 rounded-xl p-4 flex items-center justify-between gap-3">
+              <div className="text-yellow-100">
+                <div className="font-semibold">Host disconnected</div>
+                <div className="text-sm text-yellow-100/80">Waiting for host… or take over to keep playing.</div>
+              </div>
+              {!isSpectator && (
+                <button
+                  onClick={handleTakeOverHost}
+                  className="px-3 py-2 rounded-lg bg-yellow-400 text-orange-950 font-black hover:bg-yellow-300"
+                >
+                  Become Host
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Lobby */}
         {status === 'lobby' && (
@@ -414,6 +605,7 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
                   key={index}
                   onClick={() => handleCellClick(index)}
                   disabled={!isMyTurn || cell !== null || status !== 'playing'}
+                  aria-label={`Cell ${index + 1}${cell ? ` (${cell})` : ''}`}
                   className={`aspect-square text-5xl font-bold rounded-xl transition-all ${
                     cell === 'X'
                       ? 'bg-blue-600 text-white'
@@ -567,6 +759,48 @@ export default function TicTacToeGamePage({ params }: { params: Promise<{ roomCo
               </div>
             </div>
           </div>
+        )}
+
+        {showEndConfirm && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <div className="bg-orange-950 rounded-2xl p-6 max-w-md w-full border border-orange-700/50">
+              <h2 className="text-2xl font-bold text-yellow-400 mb-2 text-center">End game?</h2>
+              <p className="text-orange-200/80 text-sm text-center mb-6">
+                This will stop the current match for everyone in the room.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowEndConfirm(false)}
+                  className="flex-1 py-3 bg-white/10 hover:bg-white/15 text-white font-semibold rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleEndGame}
+                  className="flex-1 py-3 bg-yellow-500 hover:bg-yellow-400 text-orange-950 font-black rounded-lg"
+                >
+                  End Game
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {gameEnded && (
+          <GameEndedOverlay
+            title="Game Ended"
+            reason={endReason}
+            hostName={endHostName}
+            primaryAction={{ label: 'Back to Lobby', href: '/tic-tac-toe' }}
+            secondaryAction={
+              isHost
+                ? {
+                    label: 'Close',
+                    onClick: () => setGameEnded(false),
+                  }
+                : undefined
+            }
+          />
         )}
       </div>
     </ErrorBoundary>

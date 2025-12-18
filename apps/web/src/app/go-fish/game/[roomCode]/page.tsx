@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState, use, useCallback } from 'react';
+import { useEffect, useRef, useState, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGameStore } from '../../lib/gameStore';
 import { getPusherClient, getGameChannel, GO_FISH_EVENTS } from '@shared/lib/pusher';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import LoadingSpinner from '@shared/components/LoadingSpinner';
 import InvitePanel from '@shared/components/InvitePanel';
+import GameEndedOverlay from '@shared/components/GameEndedOverlay';
 import { Player, Card } from '../../types/game';
 import { getCategoryInfo, getCategoriesInHand, CATEGORIES } from '../../data/cards';
 
@@ -16,10 +17,25 @@ export default function GoFishGamePage({ params }: { params: Promise<{ roomCode:
   const [isConnected, setIsConnected] = useState(false);
   const [playerId, setPlayerId] = useState<string>('');
   const [isHost, setIsHost] = useState(false);
+  const [isSpectator, setIsSpectator] = useState(false);
+  const [playerName, setPlayerName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [showAskModal, setShowAskModal] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [gameEnded, setGameEnded] = useState(false);
+  const [endHostName, setEndHostName] = useState<string | undefined>(undefined);
+  const [endReason, setEndReason] = useState<'host-ended' | 'host-timeout' | 'inactivity' | 'unknown'>('unknown');
+  const [hostDisconnected, setHostDisconnected] = useState(false);
+
+  const joinedAsPlayerRef = useRef(false);
+  const hostHeartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const hostTimeoutIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastHostHeartbeatRef = useRef<number>(Date.now());
+
+  const HOST_HEARTBEAT_INTERVAL_MS = 10_000;
+  const HOST_HEARTBEAT_TIMEOUT_MS = 30_000;
 
   const {
     status,
@@ -70,6 +86,7 @@ export default function GoFishGamePage({ params }: { params: Promise<{ roomCode:
     const pid = sessionStorage.getItem('playerId');
     const pname = sessionStorage.getItem('playerName');
     const host = sessionStorage.getItem('isHost') === 'true';
+    const spectator = sessionStorage.getItem('isSpectator') === 'true';
 
     if (!pid || !pname) {
       router.push(`/go-fish/join/${roomCode}`);
@@ -77,14 +94,16 @@ export default function GoFishGamePage({ params }: { params: Promise<{ roomCode:
     }
 
     setPlayerId(pid);
+    setPlayerName(pname);
     setIsHost(host);
+    setIsSpectator(spectator);
     setRoomCode(roomCode);
 
     if (host) {
       setHostId(pid);
     }
 
-    // Add self to players
+    // Add self to players (spectators don't join the turn roster)
     const player: Player = {
       id: pid,
       name: pname,
@@ -93,7 +112,10 @@ export default function GoFishGamePage({ params }: { params: Promise<{ roomCode:
       sets: [],
       connectedAt: Date.now(),
     };
-    addPlayer(player);
+    if (!spectator) {
+      joinedAsPlayerRef.current = true;
+      addPlayer(player);
+    }
 
     // Connect to Pusher
     const pusher = getPusherClient();
@@ -101,7 +123,13 @@ export default function GoFishGamePage({ params }: { params: Promise<{ roomCode:
 
     channel.bind('pusher:subscription_succeeded', () => {
       setIsConnected(true);
-      broadcast(GO_FISH_EVENTS.PLAYER_JOINED, { player });
+      if (!spectator) broadcast(GO_FISH_EVENTS.PLAYER_JOINED, { player });
+
+      if (!host) {
+        setTimeout(() => {
+          broadcast(GO_FISH_EVENTS.REQUEST_STATE_SYNC, { requesterId: pid }).catch(() => {});
+        }, 400);
+      }
     });
 
     // Handle events
@@ -113,6 +141,9 @@ export default function GoFishGamePage({ params }: { params: Promise<{ roomCode:
 
     channel.bind(GO_FISH_EVENTS.PLAYER_LEFT, (data: { playerId: string }) => {
       removePlayer(data.playerId);
+      if (data.playerId && data.playerId === useGameStore.getState().hostId) {
+        setHostDisconnected(true);
+      }
     });
 
     channel.bind(GO_FISH_EVENTS.GAME_STARTED, (data: any) => {
@@ -150,13 +181,109 @@ export default function GoFishGamePage({ params }: { params: Promise<{ roomCode:
       updateGameState(data.newState);
     });
 
+    channel.bind(GO_FISH_EVENTS.GAME_ENDED, (data: { reason?: string; hostName?: string }) => {
+      setGameEnded(true);
+      setEndHostName(data?.hostName);
+      setEndReason((data?.reason as any) || 'unknown');
+      updateGameState({ status: 'finished' as const });
+    });
+
+    channel.bind(GO_FISH_EVENTS.HOST_HEARTBEAT, () => {
+      lastHostHeartbeatRef.current = Date.now();
+      if (hostDisconnected) setHostDisconnected(false);
+    });
+
+    channel.bind(GO_FISH_EVENTS.HOST_TRANSFERRED, (data: { newHostId: string; newHostName?: string }) => {
+      if (!data?.newHostId) return;
+      setHostId(data.newHostId);
+      updateGameState({
+        hostId: data.newHostId,
+        players: useGameStore.getState().players.map((p) => ({ ...p, isHost: p.id === data.newHostId })),
+      });
+      setHostDisconnected(false);
+
+      const amIHost = data.newHostId === pid;
+      setIsHost(amIHost);
+      sessionStorage.setItem('isHost', amIHost ? 'true' : 'false');
+    });
+
+    channel.bind(GO_FISH_EVENTS.REQUEST_STATE_SYNC, (data: { requesterId: string }) => {
+      if (!host) return;
+      if (!data?.requesterId || data.requesterId === pid) return;
+      const state = useGameStore.getState();
+      broadcast(GO_FISH_EVENTS.STATE_SYNC, {
+        targetId: data.requesterId,
+        state: {
+          roomCode: state.roomCode,
+          status: state.status,
+          players: state.players,
+          hostId: state.hostId,
+          deck: state.deck,
+          currentPlayerIndex: state.currentPlayerIndex,
+          lastAction: state.lastAction,
+          askedCategory: state.askedCategory,
+          askedPlayerId: state.askedPlayerId,
+          winner: state.winner,
+        },
+      }).catch(() => {});
+    });
+
+    channel.bind(GO_FISH_EVENTS.STATE_SYNC, (data: { targetId: string; state: any }) => {
+      if (data?.targetId !== pid) return;
+      if (data?.state) updateGameState(data.state);
+    });
+
     return () => {
-      broadcast(GO_FISH_EVENTS.PLAYER_LEFT, { playerId: pid });
+      if (joinedAsPlayerRef.current) broadcast(GO_FISH_EVENTS.PLAYER_LEFT, { playerId: pid });
+      fetch(`/api/rooms/${roomCode}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'leave', playerId: pid }),
+      }).catch(() => {});
+
       channel.unbind_all();
       pusher.unsubscribe(getGameChannel(roomCode));
+      if (hostHeartbeatIntervalRef.current) clearInterval(hostHeartbeatIntervalRef.current);
+      if (hostTimeoutIntervalRef.current) clearInterval(hostTimeoutIntervalRef.current);
       fullReset();
     };
   }, [roomCode, router]);
+
+  // Host heartbeat + disconnect detection
+  useEffect(() => {
+    if (!isConnected) return;
+
+    if (isHost) {
+      if (hostHeartbeatIntervalRef.current) clearInterval(hostHeartbeatIntervalRef.current);
+      hostHeartbeatIntervalRef.current = setInterval(() => {
+        broadcast(GO_FISH_EVENTS.HOST_HEARTBEAT, {}).catch(() => {});
+      }, HOST_HEARTBEAT_INTERVAL_MS);
+    }
+
+    if (hostTimeoutIntervalRef.current) clearInterval(hostTimeoutIntervalRef.current);
+    hostTimeoutIntervalRef.current = setInterval(() => {
+      const age = Date.now() - lastHostHeartbeatRef.current;
+      if (!isHost && age > HOST_HEARTBEAT_TIMEOUT_MS) setHostDisconnected(true);
+    }, 1_000);
+
+    return () => {
+      if (hostHeartbeatIntervalRef.current) clearInterval(hostHeartbeatIntervalRef.current);
+      if (hostTimeoutIntervalRef.current) clearInterval(hostTimeoutIntervalRef.current);
+    };
+  }, [isConnected, isHost, broadcast]);
+
+  const handleTakeOverHost = async () => {
+    if (isSpectator) return;
+    setIsHost(true);
+    sessionStorage.setItem('isHost', 'true');
+    setHostId(playerId);
+    updateGameState({
+      hostId: playerId,
+      players: useGameStore.getState().players.map((p) => ({ ...p, isHost: p.id === playerId })),
+    });
+    setHostDisconnected(false);
+    await broadcast(GO_FISH_EVENTS.HOST_TRANSFERRED, { newHostId: playerId, newHostName: playerName });
+  };
 
   // Clear action message after delay
   useEffect(() => {
@@ -168,6 +295,7 @@ export default function GoFishGamePage({ params }: { params: Promise<{ roomCode:
 
   // Start game
   const handleStartGame = () => {
+    if (isSpectator) return;
     if (players.length < 2) return;
 
     const store = useGameStore.getState();
@@ -268,6 +396,22 @@ export default function GoFishGamePage({ params }: { params: Promise<{ roomCode:
     router.push('/go-fish');
   };
 
+  const handleEndGame = async () => {
+    setShowEndConfirm(false);
+    const hostName = sessionStorage.getItem('playerName') || undefined;
+    setGameEnded(true);
+    setEndHostName(hostName);
+    setEndReason('host-ended');
+    updateGameState({ status: 'finished' as const });
+
+    broadcast(GO_FISH_EVENTS.GAME_ENDED, { reason: 'host-ended', hostName }).catch(() => {});
+    fetch(`/api/rooms/${roomCode}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update-status', status: 'finished' }),
+    }).catch(() => {});
+  };
+
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-cyan-600 to-blue-800 flex items-center justify-center">
@@ -292,11 +436,43 @@ export default function GoFishGamePage({ params }: { params: Promise<{ roomCode:
               Leave
             </button>
             <h1 className="text-2xl font-bold text-yellow-400">GO FISH</h1>
-            <div className="text-cyan-200 text-sm">
-              Deck: {deck.length}
+            <div className="flex items-center gap-2">
+              {isSpectator && (
+                <span className="px-2 py-1 rounded-lg bg-black/20 text-white text-xs font-semibold">
+                  Spectator
+                </span>
+              )}
+              {isHost && status !== 'lobby' && (
+                <button
+                  onClick={() => setShowEndConfirm(true)}
+                  className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-sm font-semibold"
+                >
+                  End Game
+                </button>
+              )}
+              <div className="text-cyan-200 text-sm">Deck: {deck.length}</div>
             </div>
           </div>
         </div>
+
+        {hostDisconnected && !isHost && (
+          <div className="max-w-4xl mx-auto mb-4">
+            <div className="bg-yellow-500/10 border border-yellow-300/30 rounded-xl p-4 flex items-center justify-between gap-3">
+              <div className="text-yellow-100">
+                <div className="font-semibold">Host disconnected</div>
+                <div className="text-sm text-yellow-100/80">Waiting for host… or take over to keep playing.</div>
+              </div>
+              {!isSpectator && (
+                <button
+                  onClick={handleTakeOverHost}
+                  className="px-3 py-2 rounded-lg bg-yellow-400 text-blue-950 font-black hover:bg-yellow-300"
+                >
+                  Become Host
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Action Message */}
         {actionMessage && (
@@ -569,6 +745,48 @@ export default function GoFishGamePage({ params }: { params: Promise<{ roomCode:
               </div>
             </div>
           </div>
+        )}
+
+        {showEndConfirm && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <div className="bg-blue-950 rounded-2xl p-6 max-w-md w-full border border-blue-500/50">
+              <h2 className="text-2xl font-bold text-yellow-400 mb-2 text-center">End game?</h2>
+              <p className="text-cyan-200/80 text-sm text-center mb-6">
+                This will stop the current match for everyone in the room.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowEndConfirm(false)}
+                  className="flex-1 py-3 bg-white/10 hover:bg-white/15 text-white font-semibold rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleEndGame}
+                  className="flex-1 py-3 bg-yellow-500 hover:bg-yellow-400 text-blue-950 font-black rounded-lg"
+                >
+                  End Game
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {gameEnded && (
+          <GameEndedOverlay
+            title="Game Ended"
+            reason={endReason}
+            hostName={endHostName}
+            primaryAction={{ label: 'Back to Lobby', href: '/go-fish' }}
+            secondaryAction={
+              isHost
+                ? {
+                    label: 'Close',
+                    onClick: () => setGameEnded(false),
+                  }
+                : undefined
+            }
+          />
         )}
       </div>
     </ErrorBoundary>

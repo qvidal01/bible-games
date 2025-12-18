@@ -78,6 +78,7 @@ export default function GoFishHome() {
       sessionStorage.setItem('playerId', playerId);
       sessionStorage.setItem('playerName', sanitizedName);
       sessionStorage.setItem('isHost', 'true');
+      sessionStorage.setItem('isSpectator', 'false');
 
       router.push(`/go-fish/game/${room.code}`);
     } catch (err) {

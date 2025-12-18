@@ -11,6 +11,7 @@ export default function JoinTicTacToePage({ params }: { params: Promise<{ code: 
   const { code } = use(params);
   const router = useRouter();
   const [playerName, setPlayerName] = useState('');
+  const [joinAsSpectator, setJoinAsSpectator] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [roomInfo, setRoomInfo] = useState<any>(null);
@@ -66,6 +67,7 @@ export default function JoinTicTacToePage({ params }: { params: Promise<{ code: 
       sessionStorage.setItem('playerId', playerId);
       sessionStorage.setItem('playerName', sanitizedName);
       sessionStorage.setItem('isHost', 'false');
+      sessionStorage.setItem('isSpectator', joinAsSpectator ? 'true' : 'false');
 
       router.push(`/tic-tac-toe/game/${code.toUpperCase()}`);
     } catch (err) {
@@ -124,6 +126,19 @@ export default function JoinTicTacToePage({ params }: { params: Promise<{ code: 
                   onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
                 />
               </div>
+
+              <label className="flex items-center gap-3 bg-orange-900/30 rounded-lg p-3 border border-orange-700/50">
+                <input
+                  type="checkbox"
+                  checked={joinAsSpectator}
+                  onChange={(e) => setJoinAsSpectator(e.target.checked)}
+                  className="w-4 h-4 accent-yellow-400"
+                />
+                <div className="text-sm text-orange-100">
+                  <div className="font-semibold">Join as spectator</div>
+                  <div className="text-orange-200/70 text-xs">Watch the game without taking turns</div>
+                </div>
+              </label>
 
               {error && <p className="text-red-400 text-sm">{error}</p>}
 

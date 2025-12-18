@@ -55,6 +55,16 @@ export function getRealtimeConfig(): ParsedRealtimeConfig {
   return cachedRealtime;
 }
 
+export function isRealtimeClientConfigured(): boolean {
+  const parsed = getRealtimeConfig();
+  return !!parsed.client;
+}
+
+export function isRealtimeServerConfigured(): boolean {
+  const parsed = getRealtimeConfig();
+  return !!parsed.server;
+}
+
 export function getRedisConfig(): ParsedRedisConfig {
   if (cachedRedis) return cachedRedis;
 

@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pusherServer } from '@shared/lib/pusher';
+import { isRealtimeServerConfigured } from '@shared/lib/env';
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isRealtimeServerConfigured()) {
+      return NextResponse.json(
+        { error: 'Realtime features are disabled (missing Pusher env vars).' },
+        { status: 503 }
+      );
+    }
+
     const formData = await req.formData();
     const socketId = formData.get('socket_id') as string;
     const channelName = formData.get('channel_name') as string;

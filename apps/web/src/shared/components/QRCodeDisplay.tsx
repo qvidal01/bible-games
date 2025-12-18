@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
+import { GameType } from '@shared/types';
 
 interface QRCodeDisplayProps {
   roomCode: string;
   size?: number;
-  gameType?: 'jeopardy' | 'family-feud' | 'tic-tac-toe' | 'memory-match' | 'go-fish';
+  gameType?: GameType;
 }
 
 export default function QRCodeDisplay({ roomCode, size = 200, gameType = 'jeopardy' }: QRCodeDisplayProps) {

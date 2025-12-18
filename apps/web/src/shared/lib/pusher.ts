@@ -60,6 +60,18 @@ export const SHARED_EVENTS = {
   INACTIVITY_TIMEOUT: 'inactivity-timeout',
 } as const;
 
+// Kids Trivia-specific events
+export const KIDS_TRIVIA_EVENTS = {
+  ...SHARED_EVENTS,
+  SETTINGS_UPDATED: 'settings-updated',
+  QUESTION_SET: 'question-set',
+  ANSWER_SUBMITTED: 'answer-submitted',
+  WINNER_SET: 'winner-set',
+  ANSWER_REVEALED: 'answer-revealed',
+  NEXT_QUESTION: 'next-question',
+  SCORE_UPDATED: 'score-updated',
+} as const;
+
 // Jeopardy-specific events
 export const JEOPARDY_EVENTS = {
   ...SHARED_EVENTS,

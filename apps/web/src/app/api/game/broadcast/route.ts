@@ -4,6 +4,7 @@ import { broadcastEventSchema } from '@shared/lib/validation';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { resetActivity } from '@shared/lib/roomStore';
+import { isRealtimeServerConfigured } from '@shared/lib/env';
 
 // Rate limiting (20 requests per second per IP)
 let ratelimit: Ratelimit | null = null;
@@ -22,6 +23,13 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isRealtimeServerConfigured()) {
+      return NextResponse.json(
+        { error: 'Realtime features are disabled (missing Pusher env vars).' },
+        { status: 503 }
+      );
+    }
+
     // Rate limit check
     if (ratelimit) {
       const ip = req.headers.get('x-forwarded-for') || 'anonymous';

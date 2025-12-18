@@ -11,6 +11,7 @@ export default function JoinGoFishPage({ params }: { params: Promise<{ code: str
   const { code } = use(params);
   const router = useRouter();
   const [playerName, setPlayerName] = useState('');
+  const [joinAsSpectator, setJoinAsSpectator] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [roomInfo, setRoomInfo] = useState<any>(null);
@@ -66,6 +67,7 @@ export default function JoinGoFishPage({ params }: { params: Promise<{ code: str
       sessionStorage.setItem('playerId', playerId);
       sessionStorage.setItem('playerName', sanitizedName);
       sessionStorage.setItem('isHost', 'false');
+      sessionStorage.setItem('isSpectator', joinAsSpectator ? 'true' : 'false');
 
       router.push(`/go-fish/game/${code.toUpperCase()}`);
     } catch (err) {
@@ -124,6 +126,19 @@ export default function JoinGoFishPage({ params }: { params: Promise<{ code: str
                   onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
                 />
               </div>
+
+              <label className="flex items-center gap-3 bg-blue-900/30 rounded-lg p-3 border border-blue-500/50">
+                <input
+                  type="checkbox"
+                  checked={joinAsSpectator}
+                  onChange={(e) => setJoinAsSpectator(e.target.checked)}
+                  className="w-4 h-4 accent-yellow-400"
+                />
+                <div className="text-sm text-blue-50">
+                  <div className="font-semibold">Join as spectator</div>
+                  <div className="text-blue-200/70 text-xs">Watch the game without taking turns</div>
+                </div>
+              </label>
 
               {error && <p className="text-red-400 text-sm">{error}</p>}
 

@@ -81,6 +81,7 @@ export default function MemoryMatchHome() {
       sessionStorage.setItem('playerId', playerId);
       sessionStorage.setItem('playerName', sanitizedName);
       sessionStorage.setItem('isHost', 'true');
+      sessionStorage.setItem('isSpectator', 'false');
       sessionStorage.setItem('mm-gridSize', gridSize);
       sessionStorage.setItem('mm-showHints', String(showHints));
 
