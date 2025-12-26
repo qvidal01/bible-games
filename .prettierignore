@@ -1,0 +1,25 @@
+# Build outputs
+.next/
+.turbo/
+dist/
+build/
+out/
+
+# Dependencies
+node_modules/
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Coverage
+coverage/
+
+# Generated files
+CHANGELOG.md
+
+# Videos
+*.mp4
+*.mov
+*.avi

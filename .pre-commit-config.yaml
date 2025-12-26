@@ -1,0 +1,33 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: Prettier (repo version)
+        entry: bash -c 'npx prettier --log-level warn --write "$@"'
+        language: system
+        types_or: [javascript, jsx, ts, tsx, json, markdown, yaml, css]
+      - id: eslint
+        name: ESLint (apps/web)
+        entry: bash -c 'npx eslint --fix "$@"'
+        language: system
+        files: ^apps/web/
+        types_or: [javascript, jsx, ts, tsx]
+      - id: typecheck
+        name: TypeScript typecheck
+        entry: bash -c 'npm run typecheck'
+        language: system
+        pass_filenames: false
+        always_run: true
